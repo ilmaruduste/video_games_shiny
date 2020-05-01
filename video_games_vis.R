@@ -58,16 +58,23 @@ video_games %>%
 
 
 #Visualise video game sales over time
-#TODO: Add regional parameters
-#TODO: Add possibility to choose platform
-#TODO: Make the whole thing more aesthetic xd
-#TODO: Remove NA and 2020 from the years, maybe 2017 as well
+#TODO: Add regional parameters?
+#TODO: Make the whole thing more aesthetic
+#TODO: Edit parameters or select only a range of data to make the app work for every observation
+plot_sales = function(genre, platform){
 video_games %>% 
+  filter(Genre==genre,
+         Platform==platform) %>% 
   group_by(Year_of_Release) %>% 
   summarise(Global_Sales = sum(Global_Sales)) %>% 
+  filter(Year_of_Release!='N/A') %>% 
   ggplot(aes(x=Year_of_Release, y=Global_Sales, group=1)) +
-  geom_line() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  geom_line(color='purple') +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+    ggtitle("Müügitulud")+
+    xlab("Aasta")+
+    ylab("Tulu")
+}
 
 
 #Heatmap between Platform and Genre, to see which genres sold best on certain platforms
@@ -96,3 +103,35 @@ video_games %>%
   geom_tile() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
+
+#####Shinyapp build
+ui <- fluidPage(
+
+  sidebarLayout(
+    sidebarPanel(
+
+      selectInput("Genre",
+                  strong("Vali žanr"),
+                  choices = levels(video_games$Genre),
+                  selected = "Sports"),
+              
+      
+      selectInput("Platvorm",
+                  strong("Vali platvorm"),
+                  choices = levels(video_games$Platform),
+                  selected = "Wii")
+    ),
+    
+    mainPanel(
+      h1("Videomängude müügid žanri ja platvormi järgi"),
+      p("Skratta deuu"),
+      plotOutput("joonis")))
+)
+
+server <- function(input, output) {
+  output$joonis <- renderPlot({
+    plot_sales(input$Genre, input$Platvorm)
+  })
+}
+
+shinyApp(ui, server)
