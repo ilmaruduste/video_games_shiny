@@ -1,4 +1,4 @@
-#Import the necessary libraries
+#Import the necessary packages
 library(ggplot2)
 library(dplyr)
 library(shiny)
