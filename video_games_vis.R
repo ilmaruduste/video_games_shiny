@@ -86,8 +86,8 @@ plot_sales("Sports", "Wii")
 
 #Heatmap between Platform and Genre, to see which genres sold best on certain platforms
 #TODO: Implement changing the scale from absolute sales to proportion of total sales for platform
-#TODO: Maybe flip the scales? See what works best
-
+#TODO: Look at different color schemes
+#TODO: Change legend title to "millions of units sold" or smth
 sales_heatmap <- function(selected_platforms) {
   heatmap <- video_games %>% 
     group_by(Genre, Platform) %>% 
@@ -103,7 +103,7 @@ sales_heatmap <- function(selected_platforms) {
   return(heatmap)
 }
 
-sales_heatmap(c("PS2", "PS", "PS3"))
+sales_heatmap(c("PS2", "PS", "PS3", "PC", "XB", "X360", "Wii"))
 
 #Heatmap between Platform and Genre, to see which genres sold best on certain platforms (RELATIVE VERSION)
 #WIP: Implement changing the scale from absolute sales to proportion of total sales for platform
