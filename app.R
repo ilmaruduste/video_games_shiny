@@ -17,9 +17,11 @@ mainstream_platforms <- c("XB", "X360", "WiiU", "Wii",
                           "GC", "GBA", "DS", "3DS", "2600")
 
 video_games <- video_games %>% 
-    filter(Platform %in% mainstream_platforms)
+    filter(Genre != "" && Genre != " " && Platform %in% mainstream_platforms) %>% 
+    na.omit()
 
-plot_sales = function(genre, platform){
+
+plot_sales = function(video_games, genre, platform){
     plot <- video_games %>% 
         filter(Genre==genre,
                Platform==platform) %>% 
@@ -30,12 +32,14 @@ plot_sales = function(genre, platform){
         geom_line(color='purple') +
         theme(axis.text.x = element_text(angle = 90, hjust = 1))+
         ggtitle("Müügitulud")+
-        #TODO: What units do the müügitulud have?
+        #TODO: What units do the müügitulud have? I think these are in units of copies, not $
         xlab("Aasta")+
         ylab("Tulu")
     
     return(plot)
 }
+
+
 
 # Define UI for application
 ui <- fluidPage(
@@ -70,8 +74,6 @@ server <- function(input, output, session) {
     
     observe({
         
-        # Sinu kood
-        
         updateSelectizeInput(session, "genre",
                              label = "Vali žanr",
                              choices = levels(video_games$Genre),
@@ -84,7 +86,7 @@ server <- function(input, output, session) {
     })
     
     output$plot_sales <- renderPlot({
-        plot_sales(input$genre, input$platvorm)
+        plot_sales(video_games, input$genre, input$platform)
     })
 }
 
