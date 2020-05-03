@@ -12,9 +12,6 @@ setwd(dirname(getActiveDocumentContext()$path))
 #Load the DataFrame
 video_games <- read.csv("Video_Games_Sales_as_at_22_Dec_2016.csv")
 
-
-video_games <- read.csv("https://www.kaggle.com/rush4ratio/video-game-sales-with-ratings#Video_Games_Sales_as_at_22_Dec_2016.csv")
-
 #Summarise the data to see visualisation opportunities
 summary(video_games)
 
@@ -24,11 +21,16 @@ mainstream_platforms <- c("XB", "X360", "WiiU", "Wii",
                           "PS", "PC", "NES", "N64", "GEN", 
                           "GC", "GBA", "DS", "3DS", "2600")
 
+video_games <- video_games %>% 
+  filter(Genre != "" && Genre != " " && Platform %in% mainstream_platforms) %>% 
+  na.omit()
+
+
 #Look at how Critic Scores affect sales. 
 #TODO: Maybe do the same for user scores?
 #TODO: Draw a regression line somehow
 video_games %>%
-  ggplot(aes(x=Critic_Score, y=Global_Sales)) + geom_point(aes(color=Genre)) +
+  ggplot(aes(x=Critic_Score, y=Global_Sales)) + geom_point(aes(color=Year_of_Release)) +
   scale_y_continuous(limits = c(0,40))
 
 #NOTE: Critic Scores start from 1994
@@ -85,13 +87,23 @@ plot_sales("Sports", "Wii")
 #Heatmap between Platform and Genre, to see which genres sold best on certain platforms
 #TODO: Implement changing the scale from absolute sales to proportion of total sales for platform
 #TODO: Maybe flip the scales? See what works best
-video_games %>% 
-  group_by(Genre, Platform) %>% 
-  filter(Platform %in% mainstream_platforms && Genre != "") %>% #Filtering for mainstream consoles
-  summarise(Global_Sales = sum(Global_Sales)) %>% 
-  ggplot(aes(x=Genre, y=Platform, fill=Global_Sales)) +
-  geom_tile() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+sales_heatmap <- function(selected_platforms) {
+  heatmap <- video_games %>% 
+    group_by(Genre, Platform) %>% 
+    filter(Genre != "" && Platform %in% selected_platforms) %>% #Filtering for mainstream consoles
+    summarise(Global_Sales = sum(Global_Sales)) %>% 
+    ggplot(aes(x=Platform, y=Genre, fill=Global_Sales)) +
+    geom_tile(aes(fill=Global_Sales)) +
+    geom_text(aes(label = round(Global_Sales, 1))) +
+    theme_classic() +
+    theme(axis.text.x = element_text(angle = 0, hjust = 1)) +
+    scale_fill_gradient(low="white", high = "#39ff14")
+  
+  return(heatmap)
+}
+
+sales_heatmap(c("PS2", "PS", "PS3"))
 
 #Heatmap between Platform and Genre, to see which genres sold best on certain platforms (RELATIVE VERSION)
 #WIP: Implement changing the scale from absolute sales to proportion of total sales for platform
