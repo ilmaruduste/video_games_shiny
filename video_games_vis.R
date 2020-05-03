@@ -4,7 +4,7 @@ library(ggplot2)
 library(dplyr)
 library(shiny)
 library(rstudioapi)
-library(heatmap)
+library(pheatmap)
 
 #Set Working Directory to the folder where this script is located
 setwd(dirname(getActiveDocumentContext()$path))
@@ -12,9 +12,13 @@ setwd(dirname(getActiveDocumentContext()$path))
 #Load the DataFrame
 video_games <- read.csv("Video_Games_Sales_as_at_22_Dec_2016.csv")
 
+
+video_games <- read.csv("https://www.kaggle.com/rush4ratio/video-game-sales-with-ratings#Video_Games_Sales_as_at_22_Dec_2016.csv")
+
 #Summarise the data to see visualisation opportunities
 summary(video_games)
 
+#Define mainstream platforms
 mainstream_platforms <- c("XB", "X360", "WiiU", "Wii",
                           "SNES", "PSP", "PS4", "PS3", "PS2", 
                           "PS", "PC", "NES", "N64", "GEN", 
@@ -76,6 +80,7 @@ video_games %>%
     ylab("Tulu")
 }
 
+plot_sales("Sports", "Wii")
 
 #Heatmap between Platform and Genre, to see which genres sold best on certain platforms
 #TODO: Implement changing the scale from absolute sales to proportion of total sales for platform
@@ -103,35 +108,3 @@ video_games %>%
   geom_tile() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
-
-#####Shinyapp build
-ui <- fluidPage(
-
-  sidebarLayout(
-    sidebarPanel(
-
-      selectInput("Genre",
-                  strong("Vali žanr"),
-                  choices = levels(video_games$Genre),
-                  selected = "Sports"),
-              
-      
-      selectInput("Platvorm",
-                  strong("Vali platvorm"),
-                  choices = levels(video_games$Platform),
-                  selected = "Wii")
-    ),
-    
-    mainPanel(
-      h1("Videomängude müügid žanri ja platvormi järgi"),
-      p("Skratta deuu"),
-      plotOutput("joonis")))
-)
-
-server <- function(input, output) {
-  output$joonis <- renderPlot({
-    plot_sales(input$Genre, input$Platvorm)
-  })
-}
-
-shinyApp(ui, server)
