@@ -30,7 +30,7 @@ plot_sales = function(genre, platform){
         geom_line(color='purple') +
         theme(axis.text.x = element_text(angle = 90, hjust = 1))+
         ggtitle("Müügitulud")+
-        #TODO: Mis ühikutes müügitulud on?
+        #TODO: What units do the müügitulud have?
         xlab("Aasta")+
         ylab("Tulu")
     
@@ -40,11 +40,13 @@ plot_sales = function(genre, platform){
 # Define UI for application
 ui <- fluidPage(
 
+    titlePanel("Rakendus videomängude müükide visualiseerimiseks"),
+    
     sidebarLayout(
         sidebarPanel(
             
             selectInput("genre",
-                        strong("Vali Žanr"),
+                        strong("Vali žanr"),
                         choices = levels(video_games$Genre),
                         selected = "Sports"),
             
@@ -56,9 +58,9 @@ ui <- fluidPage(
         ),
         
         mainPanel(
-            h1("Videomängude müügid Žanri ja platvormi järgi"),
+            h1("Videomängude müügid žanri ja platvormi järgi"),
             p("Skratta deuu"),
-            plotOutput("joonis")
+            plotOutput("plot_sales")
             )
         )
 )
@@ -71,7 +73,7 @@ server <- function(input, output, session) {
         # Sinu kood
         
         updateSelectizeInput(session, "genre",
-                             label = "Vali Žanr",
+                             label = "Vali žanr",
                              choices = levels(video_games$Genre),
                              selected = "Sports")
         
