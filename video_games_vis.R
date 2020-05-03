@@ -84,12 +84,10 @@ plot_sales("Sports", "Wii")
 
 #Heatmap between Platform and Genre, to see which genres sold best on certain platforms
 #TODO: Implement changing the scale from absolute sales to proportion of total sales for platform
-#TODO: Remove a lot of the non-mainstream consoles?
 #TODO: Maybe flip the scales? See what works best
-#TODO: Remove the "" Genre
 video_games %>% 
   group_by(Genre, Platform) %>% 
-  filter(Platform %in% mainstream_platforms) %>% #Filtering for mainstream consoles
+  filter(Platform %in% mainstream_platforms && Genre != "") %>% #Filtering for mainstream consoles
   summarise(Global_Sales = sum(Global_Sales)) %>% 
   ggplot(aes(x=Genre, y=Platform, fill=Global_Sales)) +
   geom_tile() +
