@@ -15,6 +15,8 @@ video_games <- read.csv("Video_Games_Sales_as_at_22_Dec_2016.csv")
 #Summarise the data to see visualisation opportunities
 summary(video_games)
 
+
+#video_games$Platform <- as.factor(video_games$Platform)
 #Define mainstream platforms
 #TODO: Maybe create a separate column for full names of consoles?
 mainstream_platforms <- c("XB", "X360", "WiiU", "Wii",
@@ -22,25 +24,43 @@ mainstream_platforms <- c("XB", "X360", "WiiU", "Wii",
                           "PS", "PC", "NES", "N64", "GEN", 
                           "GC", "GBA", "DS", "3DS", "2600")
 
+#TODO: Transform user_score to same scale that critic_score has
+video_games$User_Score <- as.numeric(video_games$User_Score)
+
 #Testing filtering...
 #For some reason the filter doesn't work at all for platforms
 playstation <- c("PS", "PS2", "PS3")
 
+pc <- "PC"
+
+#It isn't correct to omit NA, since a lot of the games made before the 90s
+  #didn't actually get scored (e.g. Super Mario Bros.)
 video_games <- video_games %>% 
-  filter(Genre != "" && Genre != " " && mainstream_platforms %in% Platform) %>% 
-  na.omit()
+  filter(Genre != "" && Genre != " " && Platform %in% mainstream_platforms) 
 
 video_games_ps <- video_games %>% 
-  filter(Genre != "" && Genre != " " && playstation %in% Platform)
+  filter(Genre != "" && Genre != " " && Platform %in% playstation)
 
-#unique(video_games$Platform)
+video_games_pc <- video_games %>% 
+  filter(Genre != "" && Genre != " " && Platform == pc)
+
+unique(video_games$Platform)
 
 #Look at how Critic Scores affect sales. 
 #TODO: Maybe do the same for user scores?
 #TODO: Draw a regression line somehow
 video_games %>%
   ggplot(aes(x=Critic_Score, y=Global_Sales)) + geom_point(aes(color=Year_of_Release)) +
-  scale_y_continuous(limits = c(0,40))
+  scale_y_continuous(limits = c(0,40))+ 
+  geom_smooth()
+
+
+#Visualize user_score and critic_score dependancy
+video_games %>% 
+  filter(User_Score != 1) %>% 
+  ggplot(aes(x=User_Score, y=Critic_Score)) + 
+  geom_point(aes(color=Rating)) + 
+  geom_smooth()
 
 #NOTE: Critic Scores start from 1994
 
