@@ -42,29 +42,57 @@ plot_sales = function(video_games, genre, platform){
 
 
 # Define UI for application
+#TODO: make the application support multiple tabs.
+#Good example here: https://shiny.rstudio.com/gallery/navbar-example.html
 ui <- fluidPage(
-
-    titlePanel("Rakendus videomängude müükide visualiseerimiseks"),
     
-    sidebarLayout(
-        sidebarPanel(
+    navbarPage("Navbar!",
+        tabPanel("Linegraph",
+           titlePanel("Rakendus videomängude müükide visualiseerimiseks"),
+    
+            sidebarLayout(
+                sidebarPanel(
             
-            selectInput("genre",
-                        strong("Vali žanr"),
-                        choices = levels(video_games$Genre),
-                        selected = "Sports"),
-            
-            
-            selectInput("platform",
-                        strong("Vali platvorm"),
-                        choices = levels(video_games$Platform),
-                        selected = "Wii")
-        ),
-        
-        mainPanel(
-            h1("Videomängude müügid žanri ja platvormi järgi"),
-            p("Skratta deuu"),
-            plotOutput("plot_sales")
+                    selectInput("genre",
+                                strong("Vali žanr"),
+                                choices = levels(video_games$Genre),
+                                selected = "Sports"),
+                    
+                    
+                    selectInput("platform",
+                                strong("Vali platvorm"),
+                                choices = levels(video_games$Platform),
+                                selected = "Wii")
+                ),
+                
+                mainPanel(
+                    h1("Videomängude müügid žanri ja platvormi järgi"),
+                    p("Skratta deuu"),
+                    plotOutput("plot_sales")
+                    )
+                )      
+            ),
+        tabPanel("Heatmap",
+                 titlePanel("Rakendus videomängude müükide visualiseerimiseks"),
+                 
+                 sidebarLayout(
+                     sidebarPanel(
+
+                         checkboxGroupInput("selected_platforms",
+                                     strong("Vali platvorm"),
+                                     choices = levels(video_games$Platform),
+                                     selected = "Wii")
+                     ),
+                     
+                     mainPanel(
+                         h1("Videomängude müügid žanri ja platvormi järgi"),
+                         p("Heatmap application here")
+                     )
+                 )      
+            ),
+        tabPanel("Summary",
+                 titlePanel("Rakendus videomängude müükide visualiseerimiseks"),
+                 verbatimTextOutput("summary")
             )
         )
 )
@@ -87,6 +115,10 @@ server <- function(input, output, session) {
     
     output$plot_sales <- renderPlot({
         plot_sales(video_games, input$genre, input$platform)
+    })
+    
+    output$summary <- renderPrint({
+        summary(video_games)
     })
 }
 
