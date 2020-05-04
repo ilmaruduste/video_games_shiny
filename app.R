@@ -20,7 +20,7 @@ video_games <- video_games %>%
     filter(Genre != "" && Genre != " " && Platform %in% mainstream_platforms) %>% 
     na.omit()
 
-
+#Define linegraph plot for video game sales
 plot_sales = function(video_games, genre, platform){
     plot <- video_games %>% 
         filter(Genre==genre,
@@ -39,7 +39,21 @@ plot_sales = function(video_games, genre, platform){
     return(plot)
 }
 
-
+#Define heatmap plot for video game sales
+plot_heatmap <- function(platforms) {
+    heatmap <- video_games %>% 
+        group_by(Genre, Platform) %>% 
+        filter(Genre != "" && Platform %in% platforms) %>% #Filtering for mainstream consoles
+        summarise(Global_Sales = sum(Global_Sales)) %>% 
+        ggplot(aes(x=Platform, y=Genre, fill=Global_Sales)) +
+        geom_tile(aes(fill=Global_Sales)) +
+        geom_text(aes(label = round(Global_Sales, 1))) +
+        theme_classic() +
+        theme(axis.text.x = element_text(angle = 0, hjust = 1)) +
+        scale_fill_gradient(low="white", high = "#39ff14")
+    
+    return(heatmap)
+}
 
 # Define UI for application
 #TODO: make the application support multiple tabs.
@@ -73,22 +87,23 @@ ui <- fluidPage(
                 )      
             ),
         tabPanel("Heatmap",
-                 titlePanel("Rakendus videomängude müükide visualiseerimiseks"),
-                 
-                 sidebarLayout(
-                     sidebarPanel(
+             titlePanel("Rakendus videomängude müükide visualiseerimiseks"),
+             
+             sidebarLayout(
+                 sidebarPanel(
 
-                         checkboxGroupInput("selected_platforms",
-                                     strong("Vali platvorm"),
-                                     choices = levels(video_games$Platform),
-                                     selected = "Wii")
-                     ),
-                     
-                     mainPanel(
-                         h1("Videomängude müügid žanri ja platvormi järgi"),
-                         p("Heatmap application here")
-                     )
-                 )      
+                     checkboxGroupInput("selected_platforms",
+                                 strong("Vali platvorm"),
+                                 choices = levels(video_games$Platform),
+                                 selected = "PC")
+                 ),
+                 
+                 mainPanel(
+                     h1("Videomängude müügid žanri ja platvormi järgi"),
+                     p("Heatmap application here"),
+                     plotOutput("plot_heatmap")
+                 )
+             )      
             ),
         tabPanel("Summary",
                  titlePanel("Rakendus videomängude müükide visualiseerimiseks"),
@@ -111,6 +126,11 @@ server <- function(input, output, session) {
                              label = "Vali platvorm",
                              choices = levels(video_games$Platform),
                              selected = "Wii")
+        
+        updateCheckboxGroupInput(session, "selected_platforms",
+                             label = "Vali platvormid visualiseerimiseks",
+                             choices = levels(video_games$Platform),
+                             selected = "PC")
     })
     
     output$plot_sales <- renderPlot({
@@ -119,6 +139,10 @@ server <- function(input, output, session) {
     
     output$summary <- renderPrint({
         summary(video_games)
+    })
+    
+    output$plot_heatmap <- renderPlot({
+        plot_heatmap(platforms = input$selected_platforms)
     })
 }
 
