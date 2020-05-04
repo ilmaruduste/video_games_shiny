@@ -16,15 +16,24 @@ video_games <- read.csv("Video_Games_Sales_as_at_22_Dec_2016.csv")
 summary(video_games)
 
 #Define mainstream platforms
+#TODO: Maybe create a separate column for full names of consoles?
 mainstream_platforms <- c("XB", "X360", "WiiU", "Wii",
                           "SNES", "PSP", "PS4", "PS3", "PS2", 
                           "PS", "PC", "NES", "N64", "GEN", 
                           "GC", "GBA", "DS", "3DS", "2600")
 
+#Testing filtering...
+#For some reason the filter doesn't work at all for platforms
+playstation <- c("PS", "PS2", "PS3")
+
 video_games <- video_games %>% 
-  filter(Genre != "" && Genre != " " && Platform %in% mainstream_platforms) %>% 
+  filter(Genre != "" && Genre != " " && mainstream_platforms %in% Platform) %>% 
   na.omit()
 
+video_games_ps <- video_games %>% 
+  filter(Genre != "" && Genre != " " && playstation %in% Platform)
+
+#unique(video_games$Platform)
 
 #Look at how Critic Scores affect sales. 
 #TODO: Maybe do the same for user scores?

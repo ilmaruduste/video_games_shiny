@@ -16,6 +16,7 @@ mainstream_platforms <- c("XB", "X360", "WiiU", "Wii",
                           "PS", "PC", "NES", "N64", "GEN", 
                           "GC", "GBA", "DS", "3DS", "2600")
 
+#TODO: Mainstream platform filtering doesn't seem to work atm, could use a fix.
 video_games <- video_games %>% 
     filter(Genre != "" && Genre != " " && Platform %in% mainstream_platforms) %>% 
     na.omit()
