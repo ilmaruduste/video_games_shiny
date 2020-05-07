@@ -3,6 +3,7 @@ library(dplyr)
 library(shiny)
 library(rstudioapi)
 library(pheatmap)
+library(shinythemes) #For stylization
 
 #Set Working Directory to the folder where this script is located
 setwd(dirname(getActiveDocumentContext()$path))
@@ -24,7 +25,7 @@ video_games <- video_games %>%
 #Reset the levels
 video_games$Platform = droplevels(video_games$Platform)
 
-
+platforms = c('Wii', 'PS2')
 #Define linegraph plot for video game sales
 plot_sales = function(video_games, genre, platforms){
   video_games %>% 
@@ -37,8 +38,10 @@ plot_sales = function(video_games, genre, platforms){
     theme(axis.text.x = element_text(angle = 90, hjust = 1))+
     ggtitle("Müüdud mängude koguarv valitud aastate lõikes")+
     xlab("Aasta")+
-    ylab("Koguarv")
+    ylab("Müük")+
+    guides(fill=guide_legend(title="Platvorm"))
 }
+
 
 
 #Define heatmap plot for video game sales
@@ -52,20 +55,26 @@ plot_heatmap <- function(platforms) {
     geom_text(aes(label = round(Global_Sales, 1))) +
     theme_classic() +
     theme(axis.text.x = element_text(angle = 0, hjust = 1)) +
-    scale_fill_gradient(low="white", high = "#39ff14")
+    scale_fill_gradient(low="white", high = "#a31000")+
+    xlab("Platvorm")+
+    ylab("Žanr")+
+    guides(fill=guide_legend(title="Üleilmsed müügid"))
 }
 
 # Define UI for application
 #TODO: make the application support multiple tabs.
 #Good example here: https://shiny.rstudio.com/gallery/navbar-example.html
 ui <- fluidPage(
+  theme = shinytheme("united"), #http://rstudio.github.io/shinythemes/
   
   navbarPage("Navbar!<3",
              tabPanel("Avaleht",
-                      titlePanel(h1("Rakendus videomängude müükide visualiseerimiseks", style = "font-family: 'Comic Sans MS'")),
+                      titlePanel(h1("Rakendus videomängude müükide visualiseerimiseks")),
+                      
+                      uiOutput("img"),
                       
                       mainPanel(
-                        h2("Projekti kirjeldus", style = "font-family: 'Comic Sans MS'"),
+                        h2("Projekti kirjeldus"),
                         p('Oleme noored andmeteadusehuvilised Tartu Ülikooli tudengid Ilmar Uduste ja Kai Budrikas ning otsustasime 
                           aine "Statistiline andmeteadus ja visualiseerimine" raames uurida erinevate videomängude müüke.
                           Andmestik, mis pärineb Kaggle-st, koosneb 16 tunnusest ja pea 16 000 erinevast mängust.'),
@@ -76,7 +85,8 @@ ui <- fluidPage(
              ),
              
              tabPanel("Joondiagramm",
-                      titlePanel(h1("Rakendus videomängude müükide visualiseerimiseks", style = "font-family: 'Comic Sans MS'")),
+                      
+                      titlePanel(h1("Rakendus videomängude müükide visualiseerimiseks")),
                       
                       sidebarLayout(
                         sidebarPanel(
@@ -94,14 +104,17 @@ ui <- fluidPage(
                         ),
                         
                         mainPanel(
-                          h2("Videomängude müügid žanri ja platvormi järgi", style = "font-family: 'Comic Sans MS'"),
-                          p("Look at this ...graph"),
-                          plotOutput("plot_sales")
+                          h2("Videomängude müügid aastate lõikes"),
+                          p("Selleks, et paremini aru saada, kuidas on videomängude müük läbi aastate muutunud, 
+                            koostasime joondiagrammi vastavalt valitud žanrile ja platvormidele."),
+                          plotOutput("plot_sales"),
+                          p("Platvormidega katsetades ilmneb, et tuntumad platvormid müüvad paremini kui teised lol no shizzle
+                            Ilmar tule appi")
                         )
                       )      
              ),
              tabPanel("Soe kaart",
-                      titlePanel(h1("Rakendus videomängude müükide visualiseerimiseks", style = "font-family: 'Comic Sans MS'")),
+                      titlePanel(h1("Rakendus videomängude müükide visualiseerimiseks")),
                       
                       sidebarLayout(
                         sidebarPanel(
@@ -113,14 +126,16 @@ ui <- fluidPage(
                         ),
                         
                         mainPanel(
-                          h2("Videomängude müügid žanri ja platvormi järgi", style = "font-family: 'Comic Sans MS'"),
-                          p("Heatmap application here"),
-                          plotOutput("plot_heatmap")
+                          h2("Videomängude müügid žanri ja platvormi järgi"),
+                          p("Erinevate platvormide žanrite müükide uurimiseks lõime heatmapi,
+                            kuhu saab valida endale meelepäraseid platvorme."),
+                          plotOutput("plot_heatmap"),
+                          p("Mdea no")
                         )
                       )      
              ),
              tabPanel("Andmestiku ülevaade",
-                      titlePanel(h1("Rakendus videomängude müükide visualiseerimiseks", style = "font-family: 'Comic Sans MS'")),
+                      titlePanel(h1("Rakendus videomängude müükide visualiseerimiseks")),
                       verbatimTextOutput("summary")
              )
   )
@@ -145,6 +160,9 @@ server <- function(input, output, session) {
                              label = "Vali platvormid visualiseerimiseks",
                              choices = levels(video_games$Platform),
                              selected = "PC")
+  })
+  output$img <- renderUI({
+    tags$img(src = "https://cdn.pixabay.com/photo/2016/04/16/09/03/video-game-1332694_1280.png", height="100%", width="100%")
   })
   
   output$plot_sales <- renderPlot({
