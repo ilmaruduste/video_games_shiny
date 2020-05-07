@@ -24,21 +24,22 @@ video_games <- video_games %>%
 #Reset the levels
 video_games$Platform = droplevels(video_games$Platform)
 
+
 #Define linegraph plot for video game sales
-plot_sales = function(video_games, genre, platform){
+plot_sales = function(video_games, genre, platforms){
   video_games %>% 
-    filter(Genre==genre,
-           Platform==platform) %>% 
-    group_by(Year_of_Release) %>% 
+    filter(Genre==genre & Platform %in% platforms) %>% 
+    group_by(Year_of_Release, Platform) %>% 
     summarise(Global_Sales = sum(Global_Sales)) %>% 
     filter(Year_of_Release!='N/A') %>% 
-    ggplot(aes(x=Year_of_Release, y=Global_Sales, group=1)) +
-    geom_line(color='purple') +
+    ggplot(aes(x=Year_of_Release, y=Global_Sales, group=Platform, color=Platform)) +
+    geom_line() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1))+
     ggtitle("Müüdud mängude koguarv valitud aastate lõikes")+
     xlab("Aasta")+
     ylab("Koguarv")
 }
+
 
 #Define heatmap plot for video game sales
 plot_heatmap <- function(platforms) {
@@ -62,16 +63,16 @@ ui <- fluidPage(
   navbarPage("Navbar!<3",
              tabPanel("Avaleht",
                       titlePanel(h1("Rakendus videomängude müükide visualiseerimiseks", style = "font-family: 'Comic Sans MS'")),
-                        
-                        mainPanel(
-                          h2("Projekti kirjeldus", style = "font-family: 'Comic Sans MS'"),
-                          p('Oleme noored andmeteadusehuvilised Tartu Ülikooli tudengid Ilmar Uduste ja Kai Budrikas ning otsustasime 
+                      
+                      mainPanel(
+                        h2("Projekti kirjeldus", style = "font-family: 'Comic Sans MS'"),
+                        p('Oleme noored andmeteadusehuvilised Tartu Ülikooli tudengid Ilmar Uduste ja Kai Budrikas ning otsustasime 
                           aine "Statistiline andmeteadus ja visualiseerimine" raames uurida erinevate videomängude müüke.
                           Andmestik, mis pärineb Kaggle-st, koosneb 16 tunnusest ja pea 16 000 erinevast mängust.'),
-                          p('Selleks, et oma andmeid kenasti visualiseerida, koostasime 100 002 interaktiivset visualiseeringut, 
+                        p('Selleks, et oma andmeid kenasti visualiseerida, koostasime 100 002 interaktiivset visualiseeringut, 
                             mida võite uurida järgmistelt lehekülgedelt.') #Xd palun töötle mind
-                        )
-                            
+                      )
+                      
              ),
              
              tabPanel("Joondiagramm",
@@ -86,10 +87,10 @@ ui <- fluidPage(
                                       selected = "Sports"),
                           
                           
-                          selectInput("platform",
-                                      strong("Vali platvorm"),
-                                      choices = levels(video_games$Platform),
-                                      selected = "Wii")
+                          checkboxGroupInput("selected_platformss",
+                                             strong("Vali platvormid"),
+                                             choices = levels(video_games$Platform),
+                                             selected = "PC")
                         ),
                         
                         mainPanel(
@@ -106,7 +107,7 @@ ui <- fluidPage(
                         sidebarPanel(
                           
                           checkboxGroupInput("selected_platforms",
-                                             strong("Vali platvorm"),
+                                             strong("Vali platvormid"),
                                              choices = levels(video_games$Platform),
                                              selected = "PC")
                         ),
@@ -135,10 +136,10 @@ server <- function(input, output, session) {
                          choices = levels(video_games$Genre),
                          selected = "Sports")
     
-    updateSelectizeInput(session, "platform",
-                         label = "Vali platvorm",
-                         choices = levels(video_games$Platform),
-                         selected = "Wii")
+    updateCheckboxGroupInput(session, "selected_platformss",
+                             label = "Vali platvormid visualiseerimiseks",
+                             choices = levels(video_games$Platform),
+                             selected = "PC")
     
     updateCheckboxGroupInput(session, "selected_platforms",
                              label = "Vali platvormid visualiseerimiseks",
@@ -147,7 +148,7 @@ server <- function(input, output, session) {
   })
   
   output$plot_sales <- renderPlot({
-    plot_sales(video_games, input$genre, input$platform)
+    plot_sales(video_games, input$genre, input$selected_platformss)
   })
   
   output$summary <- renderPrint({
