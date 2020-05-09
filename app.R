@@ -43,7 +43,6 @@ plot_sales = function(video_games, genre, platforms){
     ggtitle("Müüdud mängude koguarv valitud aastate lõikes")+
     xlab("Aasta")+
     ylab("Müük")+
-    theme(legend.position = "none") +
     guides(fill=guide_legend(title="Platvorm"))
 }
 
@@ -215,6 +214,7 @@ ui <- fluidPage(
                                              strong("Vali platvormid"),
                                              choices = levels(video_games$Platform),
                                              selected = "PC"),
+                          checkboxInput('all_platforms_games', 'Kõik valikud'),
                           selectInput("genre_games",
                                       strong("Vali žanr"),
                                       choices = levels(video_games$Genre),
@@ -258,7 +258,7 @@ server <- function(input, output, session) {
     updateCheckboxGroupInput(session, "selected_platforms_games",
                              label = "Vali platvormid visualiseerimiseks",
                              choices = levels(video_games$Platform),
-                             selected = "PC")
+                             selected = if (input$all_platforms_games) levels(video_games$Platform) else "PC")
     
     updateSelectizeInput(session, "genre_games",
                          label = "Vali žanr",
