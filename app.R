@@ -29,6 +29,7 @@ video_games$Platform = droplevels(video_games$Platform)
 
 #platforms = c('Wii', 'PS2')
 #Define linegraph plot for video game sales
+#TODO: Fix legend
 plot_sales = function(video_games, genre, platforms){
   video_games %>% 
     filter(Genre==genre & Platform %in% platforms) %>% 
@@ -36,11 +37,13 @@ plot_sales = function(video_games, genre, platforms){
     summarise(Global_Sales = sum(Global_Sales)) %>% 
     filter(Year_of_Release!='N/A') %>% 
     ggplot(aes(x=Year_of_Release, y=Global_Sales, group=Platform, color=Platform)) +
-    geom_line() +
+    geom_ribbon(aes(ymin=0, ymax= Global_Sales, fill=Platform), alpha=0.2) + #TODO: See if this can be improved. Right now the filling is quite ugly. Turn down opacity somehow?
+    #geom_line() + #TODO: Play around with this and see what works better
     theme(axis.text.x = element_text(angle = 90, hjust = 1))+
     ggtitle("Müüdud mängude koguarv valitud aastate lõikes")+
     xlab("Aasta")+
     ylab("Müük")+
+    theme(legend.position = "none") +
     guides(fill=guide_legend(title="Platvorm"))
 }
 
@@ -76,10 +79,10 @@ plot_publishers = function(genre, platforms, n) {
     group_by(Publisher) %>% 
     summarise(Global_Sales = sum(Global_Sales)) %>% 
     arrange(desc(Global_Sales)) %>% 
-    top_n(n) %>% 
+    top_n(n, Global_Sales) %>% 
     ggplot(aes(x=Publisher, y=Global_Sales)) + 
     geom_bar(stat="identity", color = "#a31000") +
-    geom_text(aes(label=Global_Sales), vjust=1.6, color="white", size=3.5) +
+    geom_text(aes(label=Global_Sales), vjust=1.6, color="white", size=3.5)+
     theme(axis.text.x = element_text(angle = 90, hjust = 1))+
     ggtitle("Müüdud mängud")+
     xlab("Jaotaja")+
@@ -87,7 +90,6 @@ plot_publishers = function(genre, platforms, n) {
 }
 
 #Visualise highest regional/global sales by game
-#TODO: Fix filter for seeing n games
 #TODO: Sort the values on the graph
 #TODO: Fill the global sales bar with regional sales perhaps?
 #TODO: Add possibility to see sales for ALL genres and platforms
@@ -98,10 +100,10 @@ plot_games = function(genre, platforms, n) {
     filter(Genre==genre,
            Platform %in% platforms) %>%
     arrange(desc(Global_Sales)) %>% 
-    top_n(n) %>% 
+    top_n(n, Global_Sales) %>% 
     ggplot(aes(x=Name, y=Global_Sales)) + 
     geom_bar(stat="identity", color = "#a31000") +
-    geom_text(aes(label=Global_Sales), vjust=1.6, color="white", size=3.5) +
+    geom_text(aes(label=Global_Sales), vjust=1.6, color="white", size=3.5)+
     theme(axis.text.x = element_text(angle = 90, hjust = 1))+
     ggtitle("Müüdud mängud")+
     xlab("Mäng")+
