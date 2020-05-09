@@ -19,8 +19,7 @@ mainstream_platforms <- c("XB", "X360", "WiiU", "Wii",
 
 #Mainstream platform filtering
 video_games <- video_games %>% 
-  filter(Genre != "" & Genre != " " & Platform %in% mainstream_platforms) %>% 
-  na.omit()
+  filter(Genre != "" & Genre != " " & Platform %in% mainstream_platforms) 
 
 #TODO: Transform user_score to same scale that critic_score has
 video_games$User_Score <- as.numeric(video_games$User_Score)
@@ -28,7 +27,7 @@ video_games$User_Score <- as.numeric(video_games$User_Score)
 #Reset the levels
 video_games$Platform = droplevels(video_games$Platform)
 
-platforms = c('Wii', 'PS2')
+#platforms = c('Wii', 'PS2')
 #Define linegraph plot for video game sales
 plot_sales = function(video_games, genre, platforms){
   video_games %>% 
@@ -65,12 +64,11 @@ plot_heatmap <- function(platforms) {
 }
 
 # Define UI for application
-#TODO: make the application support multiple tabs.
-#Good example here: https://shiny.rstudio.com/gallery/navbar-example.html
+# Good example of navbar usage here: https://shiny.rstudio.com/gallery/navbar-example.html
 ui <- fluidPage(
   theme = shinytheme("united"), #http://rstudio.github.io/shinythemes/
   
-  navbarPage("Navbar!<3",
+  navbarPage("Navigatsiooniriba",
              tabPanel("Avaleht",
                       titlePanel(h1("Rakendus videomängude müükide visualiseerimiseks")),
                       
@@ -87,6 +85,30 @@ ui <- fluidPage(
                       
              ),
              
+             tabPanel("Andmestiku ülevaade",
+                      titlePanel(h1("Rakendus videomängude müükide visualiseerimiseks")),
+                      p(tags$a(
+                        href="https://www.kaggle.com/rush4ratio/video-game-sales-with-ratings", "Videomängude andmestik"), 
+                        "on võetud andmeteadust propageerivalt lehelt Kaggle, kus jagatakse andmestikke
+                        ning erinevaid töövihikud, mis põhinevad jagatavatel andmestikel."),
+                      p("Allpool on kuvatud andmestiku tunnused:"),
+                      verbatimTextOutput("colnames"),
+                      p("Esialgne andmestik koosneb 16 tunnusest ning 16 719 kirjest, mida omakorda filtreeritakse, et
+                        visualiseerimiseks kasutatav andmestik vastaks teatud nõutele:"),
+                      tags$ol(
+                        tags$li("Filtreeritakse välja mänguplatvormid, mida ei peeta peavoolu omadeks. 
+                                Kasutatavate mänguplatvormide hulk on järgmine: ",
+                                verbatimTextOutput("platforms")),
+                        tags$li("Tunnus ", tags$b("User_score"), " ei ole õiges andmetüübiga, seega see teisendatakse "
+                                , tags$b("numeric"), " tüübiks."),
+                        tags$li("Tunnus ", tags$b("Genre"), " omab tühjasid väärtuseid (kuid mitte NA!), seega filtreeritakse mängud,
+                                millel on žanri väli tühi.")
+                      ),
+                      p("Pärast andmete korrastamist jääb andmestikku 15 684 kirjet. 
+                        Allpool on näha näiteid/kokkuvõtteid mõningatest tunnustest:"),
+                      verbatimTextOutput("summary")
+             ),
+          
              tabPanel("Joondiagramm",
                       
                       titlePanel(h1("Rakendus videomängude müükide visualiseerimiseks")),
@@ -136,10 +158,6 @@ ui <- fluidPage(
                           p("Mdea no")
                         )
                       )      
-             ),
-             tabPanel("Andmestiku ülevaade",
-                      titlePanel(h1("Rakendus videomängude müükide visualiseerimiseks")),
-                      verbatimTextOutput("summary")
              )
   )
 )
@@ -176,9 +194,23 @@ server <- function(input, output, session) {
     summary(video_games)
   })
   
+  output$colnames <- renderPrint({
+    colnames(video_games)
+  })
+  
+    output$platforms <- renderPrint({
+      mainstream_platforms <- c("XB", "X360", "WiiU", "Wii",
+                                "SNES", "PSP", "PS4", "PS3", "PS2", 
+                                "PS", "PC", "NES", "N64", "GEN", 
+                                "GC", "GBA", "DS", "3DS", "2600")
+      mainstream_platforms
+  })
+    
   output$plot_heatmap <- renderPlot({
     plot_heatmap(platforms = input$selected_platforms)
   })
+  
+
 }
 
 # Run the application 
