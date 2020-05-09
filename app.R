@@ -4,6 +4,7 @@ library(shiny)
 library(rstudioapi)
 library(pheatmap)
 library(shinythemes) #For stylization
+library(shinyWidgets) #For more elegant category selection
 
 #Set Working Directory to the folder where this script is located
 setwd(dirname(getActiveDocumentContext()$path))
@@ -71,9 +72,9 @@ plot_heatmap <- function(platforms) {
 #TODO: Add possibility to see sales for ALL genres and platforms
 #TODO: Fix axis names and clean up the graph
 
-plot_publishers = function(genre, platforms, n) {
+plot_publishers = function(genres, platforms, n) {
   video_games %>% 
-    filter(Genre==genre,
+    filter(Genre %in% genres,
            Platform %in% platforms) %>%
     group_by(Publisher) %>% 
     summarise(Global_Sales = sum(Global_Sales)) %>% 
@@ -81,7 +82,7 @@ plot_publishers = function(genre, platforms, n) {
     top_n(n, Global_Sales) %>% 
     ggplot(aes(x=Publisher, y=Global_Sales)) + 
     geom_bar(stat="identity", color = "#a31000") +
-    geom_text(aes(label=Global_Sales), vjust=1.6, color="white", size=3.5)+
+    geom_text(aes(label=round(Global_Sales, 1)), vjust=1.6, color="white", size=3.5)+
     theme(axis.text.x = element_text(angle = 90, hjust = 1))+
     ggtitle("Müüdud mängud")+
     xlab("Jaotaja")+
@@ -94,15 +95,15 @@ plot_publishers = function(genre, platforms, n) {
 #TODO: Add possibility to see sales for ALL genres and platforms
 #TODO: Fix axis names and clean up the graph
 
-plot_games = function(genre, platforms, n) {
+plot_games = function(genres, platforms, n) {
   video_games %>% 
-    filter(Genre==genre,
+    filter(Genre %in% genres,
            Platform %in% platforms) %>%
     arrange(desc(Global_Sales)) %>% 
     top_n(n, Global_Sales) %>% 
     ggplot(aes(x=Name, y=Global_Sales)) + 
     geom_bar(stat="identity", color = "#a31000") +
-    geom_text(aes(label=Global_Sales), vjust=1.6, color="white", size=3.5)+
+    geom_text(aes(label=round(Global_Sales, 1)), vjust=1.6, color="white", size=3.5)+
     theme(axis.text.x = element_text(angle = 90, hjust = 1))+
     ggtitle("Müüdud mängud")+
     xlab("Mäng")+
@@ -215,10 +216,19 @@ ui <- fluidPage(
                                              choices = levels(video_games$Platform),
                                              selected = "PC"),
                           checkboxInput('all_platforms_games', 'Kõik valikud'),
-                          selectInput("genre_games",
-                                      strong("Vali žanr"),
+                          pickerInput(
+                                      inputId = "genre_games", label = "Vali žanr",
                                       choices = levels(video_games$Genre),
-                                      selected = "Sports"),
+                                      options = list(`actions-box` = TRUE,
+                                                     `selected-text-format` = paste0("count = ", length(levels(video_games$Genre))),
+                                                     `count-selected-text` = "Kõik valikud",
+                                                     `select-all-text` = "Vali kõik",
+                                                     `deselect-all-text` = "Tühista valik"),
+                                      multiple = TRUE),
+                          #selectInput("genre_games",
+                          #            strong("Vali žanr"),
+                          #            choices = levels(video_games$Genre),
+                          #            selected = "Sports"),
                           sliderInput("n_games", 
                                       strong("Mängude/jaotajate arv"),
                                       min = 5, max = 30,
@@ -294,11 +304,11 @@ server <- function(input, output, session) {
   })
   
   output$games <- renderPlot({
-    plot_games(platforms = input$selected_platforms_games, genre = input$genre_games, n = input$n_games)
+    plot_games(platforms = input$selected_platforms_games, genres = input$genre_games, n = input$n_games)
   })
   
   output$publishers <- renderPlot({
-    plot_publishers(platforms = input$selected_platforms_games, genre = input$genre_games, n = input$n_games)
+    plot_publishers(platforms = input$selected_platforms_games, genres = input$genre_games, n = input$n_games)
   })
 
 }
