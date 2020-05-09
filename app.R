@@ -22,6 +22,9 @@ video_games <- video_games %>%
   filter(Genre != "" & Genre != " " & Platform %in% mainstream_platforms) %>% 
   na.omit()
 
+#TODO: Transform user_score to same scale that critic_score has
+video_games$User_Score <- as.numeric(video_games$User_Score)
+
 #Reset the levels
 video_games$Platform = droplevels(video_games$Platform)
 
