@@ -24,6 +24,8 @@ mainstream_platforms <- c("XB", "X360", "WiiU", "Wii",
                           "PS", "PC", "NES", "N64", "GEN", 
                           "GC", "GBA", "DS", "3DS", "2600")
 
+colnames(video_games)
+
 #TODO: Transform user_score to same scale that critic_score has
 video_games$User_Score <- as.numeric(video_games$User_Score)
 
@@ -82,15 +84,39 @@ video_games %>%
 #TODO: add filter for seeing publishers with n to m sales
 #TODO: Sort the values on the graph
 #TODO: Fill the global sales bar with regional sales perhaps?
-video_games %>% 
-  group_by(Publisher) %>% 
-  summarise(Global_Sales = sum(Global_Sales)) %>% 
-  arrange(desc(Global_Sales)) %>% 
-  top_n(15) %>% 
-  ggplot(aes(x=Publisher, y=Global_Sales)) + 
-  geom_bar(stat="identity") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+plot_publishers = function(genre, platform, n) {
+  video_games %>% 
+    filter(Genre==genre,
+           Platform==platform) %>%
+    group_by(Publisher) %>% 
+    summarise(Global_Sales = sum(Global_Sales)) %>% 
+    arrange(desc(Global_Sales)) %>% 
+    top_n(n) %>% 
+    ggplot(aes(x=Publisher, y=Global_Sales)) + 
+    geom_bar(stat="identity") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+    ggtitle("Müüdud mängud")+
+    xlab("Aasta")+
+    ylab("Miljon müüdud ühikut")
+}
 
+plot_games = function(genre, platform, n) {
+  video_games %>% 
+    filter(Genre==genre,
+           Platform==platform) %>%
+    group_by(Publisher) %>% 
+    arrange(desc(Global_Sales)) %>% 
+    top_n(n) %>% 
+    ggplot(aes(x=Name, y=Global_Sales)) + 
+    geom_bar(stat="identity") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+    ggtitle("Müüdud mängud")+
+    xlab("Aasta")+
+    ylab("Miljon müüdud ühikut")
+}
+
+plot_publishers("Sports", "Wii", 10)
+plot_games("Sports", "Wii", 10)
 
 #Visualise video game sales over time
 #TODO: Add regional parameters?

@@ -21,7 +21,7 @@ mainstream_platforms <- c("XB", "X360", "WiiU", "Wii",
 video_games <- video_games %>% 
   filter(Genre != "" & Genre != " " & Platform %in% mainstream_platforms) 
 
-#TODO: Transform user_score to same scale that critic_score has
+# Transform user_score to same scale that critic_score has
 video_games$User_Score <- as.numeric(video_games$User_Score)
 
 #Reset the levels
@@ -61,6 +61,51 @@ plot_heatmap <- function(platforms) {
     xlab("Platvorm")+
     ylab("Žanr")+
     guides(fill=guide_legend(title="Üleilmsed müügid"))
+}
+
+#Visualise highest regional/global sales by publisher
+#TODO: Sort the values on the graph
+#TODO: Fill the global sales bar with regional sales perhaps?
+#TODO: Add possibility to see sales for ALL genres and platforms
+#TODO: Fix axis names and clean up the graph
+
+plot_publishers = function(genre, platforms, n) {
+  video_games %>% 
+    filter(Genre==genre,
+           Platform %in% platforms) %>%
+    group_by(Publisher) %>% 
+    summarise(Global_Sales = sum(Global_Sales)) %>% 
+    arrange(desc(Global_Sales)) %>% 
+    top_n(n) %>% 
+    ggplot(aes(x=Publisher, y=Global_Sales)) + 
+    geom_bar(stat="identity", color = "#a31000") +
+    geom_text(aes(label=Global_Sales), vjust=1.6, color="white", size=3.5) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+    ggtitle("Müüdud mängud")+
+    xlab("Jaotaja")+
+    ylab("Miljon müüdud ühikut")
+}
+
+#Visualise highest regional/global sales by game
+#TODO: Fix filter for seeing n games
+#TODO: Sort the values on the graph
+#TODO: Fill the global sales bar with regional sales perhaps?
+#TODO: Add possibility to see sales for ALL genres and platforms
+#TODO: Fix axis names and clean up the graph
+
+plot_games = function(genre, platforms, n) {
+  video_games %>% 
+    filter(Genre==genre,
+           Platform %in% platforms) %>%
+    arrange(desc(Global_Sales)) %>% 
+    top_n(n) %>% 
+    ggplot(aes(x=Name, y=Global_Sales)) + 
+    geom_bar(stat="identity", color = "#a31000") +
+    geom_text(aes(label=Global_Sales), vjust=1.6, color="white", size=3.5) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+    ggtitle("Müüdud mängud")+
+    xlab("Mäng")+
+    ylab("Miljon müüdud ühikut")
 }
 
 # Define UI for application
@@ -122,7 +167,7 @@ ui <- fluidPage(
                                       selected = "Sports"),
                           
                           
-                          checkboxGroupInput("selected_platformss",
+                          checkboxGroupInput("selected_platforms_line",
                                              strong("Vali platvormid"),
                                              choices = levels(video_games$Platform),
                                              selected = "PC")
@@ -158,7 +203,33 @@ ui <- fluidPage(
                           p("Mdea no")
                         )
                       )      
-             )
+              ),
+             tabPanel("Mängud ja jaotajad",
+                      titlePanel(h1("Rakendus videomängude müükide visualiseerimiseks")),
+                      
+                      sidebarLayout(
+                        sidebarPanel(
+                          checkboxGroupInput("selected_platforms_games",
+                                             strong("Vali platvormid"),
+                                             choices = levels(video_games$Platform),
+                                             selected = "PC"),
+                          selectInput("genre_games",
+                                      strong("Vali žanr"),
+                                      choices = levels(video_games$Genre),
+                                      selected = "Sports"),
+                          sliderInput("n_games", 
+                                      strong("Mängude/jaotajate arv"),
+                                      min = 5, max = 30,
+                                      value = 10)
+                        ),
+                        
+                        mainPanel(
+                          h2("ASD"),
+                          plotOutput("games"),
+                          plotOutput("publishers")
+                        )
+                      )
+              )
   )
 )
 
@@ -172,7 +243,7 @@ server <- function(input, output, session) {
                          choices = levels(video_games$Genre),
                          selected = "Sports")
     
-    updateCheckboxGroupInput(session, "selected_platformss",
+    updateCheckboxGroupInput(session, "selected_platforms_line",
                              label = "Vali platvormid visualiseerimiseks",
                              choices = levels(video_games$Platform),
                              selected = "PC")
@@ -181,13 +252,23 @@ server <- function(input, output, session) {
                              label = "Vali platvormid visualiseerimiseks",
                              choices = levels(video_games$Platform),
                              selected = "PC")
+    
+    updateCheckboxGroupInput(session, "selected_platforms_games",
+                             label = "Vali platvormid visualiseerimiseks",
+                             choices = levels(video_games$Platform),
+                             selected = "PC")
+    
+    updateSelectizeInput(session, "genre_games",
+                         label = "Vali žanr",
+                         choices = levels(video_games$Genre),
+                         selected = "Sports")
   })
   output$img <- renderUI({
     tags$img(src = "https://cdn.pixabay.com/photo/2016/04/16/09/03/video-game-1332694_1280.png", height="100%", width="100%")
   })
   
   output$plot_sales <- renderPlot({
-    plot_sales(video_games, input$genre, input$selected_platformss)
+    plot_sales(video_games, input$genre, input$selected_platforms_line)
   })
   
   output$summary <- renderPrint({
@@ -210,6 +291,13 @@ server <- function(input, output, session) {
     plot_heatmap(platforms = input$selected_platforms)
   })
   
+  output$games <- renderPlot({
+    plot_games(platforms = input$selected_platforms_games, genre = input$genre_games, n = input$n_games)
+  })
+  
+  output$publishers <- renderPlot({
+    plot_publishers(platforms = input$selected_platforms_games, genre = input$genre_games, n = input$n_games)
+  })
 
 }
 
