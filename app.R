@@ -50,7 +50,23 @@ plot_sales = function(video_games, genres, platforms){
     guides(fill=guide_legend(title="Platvorm"))
 }
 
+#Print out Sales for each platform
 
+text_sales = function(platforms) {
+  
+  text <- c("Platform Sales:")
+  
+  for (platform in platforms) {
+    correct_platform <- video_games %>% 
+      filter(Platform == platform)
+    
+    sales <- sum(correct_platform$Global_Sales)
+    print(platform)
+    text <- append(text, sales)
+  }
+  
+  return(text)
+}
 
 #Define heatmap plot for video game sales
 plot_heatmap <- function(platforms) {
@@ -186,7 +202,8 @@ ui <- fluidPage(
                             koostasime joondiagrammi vastavalt valitud žanrile ja platvormidele."),
                           plotOutput("plot_sales"),
                           p("Platvormidega katsetades ilmneb, et tuntumad platvormid müüvad paremini kui teised lol no shizzle
-                            Ilmar tule appi")
+                            Ilmar tule appi"),
+                          verbatimTextOutput("text_sales")
                         )
                       )      
              ),
@@ -286,6 +303,10 @@ server <- function(input, output, session) {
   
   output$plot_sales <- renderPlot({
     plot_sales(video_games, input$genre, input$selected_platforms_line)
+  })
+  
+  output$text_sales <- renderPrint({
+    text_sales(input$selected_platforms_line)
   })
   
   output$summary <- renderPrint({
