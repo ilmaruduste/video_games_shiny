@@ -28,12 +28,15 @@ video_games$User_Score <- as.numeric(video_games$User_Score)
 #Reset the levels
 video_games$Platform = droplevels(video_games$Platform)
 
+#####  Color Palette by Paletton.com
+#####  Palette URL: http://paletton.com/#uid=70d0u0krBtfh7Btm6uVu1nxyMi-
+
 #platforms = c('Wii', 'PS2')
 #Define linegraph plot for video game sales
 #TODO: Fix legend
-plot_sales = function(video_games, genre, platforms){
+plot_sales = function(video_games, genres, platforms){
   video_games %>% 
-    filter(Genre==genre & Platform %in% platforms) %>% 
+    filter(Genre %in% genres & Platform %in% platforms) %>% 
     group_by(Year_of_Release, Platform) %>% 
     summarise(Global_Sales = sum(Global_Sales)) %>% 
     filter(Year_of_Release!='N/A') %>% 
@@ -43,7 +46,7 @@ plot_sales = function(video_games, genre, platforms){
     theme(axis.text.x = element_text(angle = 90, hjust = 1))+
     ggtitle("Müüdud mängude koguarv valitud aastate lõikes")+
     xlab("Aasta")+
-    ylab("Müük")+
+    ylab("Müüdud mängude arv, 10^6")+
     guides(fill=guide_legend(title="Platvorm"))
 }
 
@@ -60,16 +63,15 @@ plot_heatmap <- function(platforms) {
     geom_text(aes(label = round(Global_Sales, 1))) +
     theme_classic() +
     theme(axis.text.x = element_text(angle = 0, hjust = 1)) +
-    scale_fill_gradient(low="white", high = "#a31000")+
+    scale_fill_gradient(low="white", high = "#E99020")+
     xlab("Platvorm")+
     ylab("Žanr")+
-    guides(fill=guide_legend(title="Üleilmsed müügid"))
+    guides(fill=guide_legend(title="Üleilmsed müügid sõltuvalt
+platvormist ja žanrist, 10^6"))
 }
 
 #Visualise highest regional/global sales by publisher
-#TODO: Sort the values on the graph
 #TODO: Fill the global sales bar with regional sales perhaps?
-#TODO: Add possibility to see sales for ALL genres and platforms
 #TODO: Fix axis names and clean up the graph
 
 plot_publishers = function(genres, platforms, n) {
@@ -80,19 +82,17 @@ plot_publishers = function(genres, platforms, n) {
     summarise(Global_Sales = sum(Global_Sales)) %>% 
     arrange(desc(Global_Sales)) %>% 
     top_n(n, Global_Sales) %>% 
-    ggplot(aes(x=Publisher, y=Global_Sales)) + 
-    geom_bar(stat="identity", color = "#a31000") +
+    ggplot(aes(x=reorder(Publisher, -Global_Sales), y=Global_Sales)) + 
+    geom_bar(stat="identity", fill = "#1C6595") +
     geom_text(aes(label=round(Global_Sales, 1)), vjust=1.6, color="white", size=3.5)+
     theme(axis.text.x = element_text(angle = 90, hjust = 1))+
     ggtitle("Müüdud mängud")+
     xlab("Jaotaja")+
-    ylab("Miljon müüdud ühikut")
+    ylab("Müüdud mängude arv, 10^6")
 }
 
 #Visualise highest regional/global sales by game
-#TODO: Sort the values on the graph
 #TODO: Fill the global sales bar with regional sales perhaps?
-#TODO: Add possibility to see sales for ALL genres and platforms
 #TODO: Fix axis names and clean up the graph
 
 plot_games = function(genres, platforms, n) {
@@ -101,13 +101,13 @@ plot_games = function(genres, platforms, n) {
            Platform %in% platforms) %>%
     arrange(desc(Global_Sales)) %>% 
     top_n(n, Global_Sales) %>% 
-    ggplot(aes(x=Name, y=Global_Sales)) + 
-    geom_bar(stat="identity", color = "#a31000") +
+    ggplot(aes(x=reorder(Name, -Global_Sales), y=Global_Sales)) + 
+    geom_bar(stat="identity", fill = "#16A25F") +
     geom_text(aes(label=round(Global_Sales, 1)), vjust=1.6, color="white", size=3.5)+
     theme(axis.text.x = element_text(angle = 90, hjust = 1))+
     ggtitle("Müüdud mängud")+
     xlab("Mäng")+
-    ylab("Miljon müüdud ühikut")
+    ylab("Müüdud mängude arv, 10^6")
 }
 
 # Define UI for application
@@ -163,10 +163,15 @@ ui <- fluidPage(
                       sidebarLayout(
                         sidebarPanel(
                           
-                          selectInput("genre",
-                                      strong("Vali žanr"),
-                                      choices = levels(video_games$Genre),
-                                      selected = "Sports"),
+                          pickerInput(
+                            inputId = "genre", label = "Vali žanr",
+                            choices = levels(video_games$Genre),
+                            options = list(`actions-box` = TRUE,
+                                           `selected-text-format` = paste0("count = ", length(levels(video_games$Genre))),
+                                           `count-selected-text` = "Kõik valikud",
+                                           `select-all-text` = "Vali kõik",
+                                           `deselect-all-text` = "Tühista valik"),
+                            multiple = TRUE),
                           
                           
                           checkboxGroupInput("selected_platforms_line",
