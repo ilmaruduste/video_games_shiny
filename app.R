@@ -54,15 +54,17 @@ plot_sales = function(video_games, genres, platforms){
 
 text_sales = function(platforms) {
   
-  text <- c("Platform Sales:")
+  text <- c()
   
   for (platform in platforms) {
     correct_platform <- video_games %>% 
       filter(Platform == platform)
     
     sales <- sum(correct_platform$Global_Sales)
-    print(platform)
-    text <- append(text, sales)
+    plt_sales = paste(toString(platform), "Global Sales:", sep=" ") #a little kilplaneism never hurt nobody
+    plt_sales = paste(plt_sales, toString(sales), sep=" ")
+    plt_sales = paste(plt_sales, "M", sep="")
+    text <- append(text, plt_sales)
   }
   
   return(text)
@@ -153,7 +155,7 @@ ui <- fluidPage(
                       p(tags$a(
                         href="https://www.kaggle.com/rush4ratio/video-game-sales-with-ratings", "Videomängude andmestik"), 
                         "on võetud andmeteadust propageerivalt lehelt Kaggle, kus jagatakse andmestikke
-                        ning erinevaid töövihikud, mis põhinevad jagatavatel andmestikel."),
+                        ning neil põhinevaid töövihikuid. Andmestik on aastast 2016."),
                       p("Allpool on kuvatud andmestiku tunnused:"),
                       verbatimTextOutput("colnames"),
                       p("Esialgne andmestik koosneb 16 tunnusest ning 16 719 kirjest, mida omakorda filtreeritakse, et
@@ -169,9 +171,27 @@ ui <- fluidPage(
                       ),
                       p("Pärast andmete korrastamist jääb andmestikku 15 684 kirjet. 
                         Allpool on näha näiteid/kokkuvõtteid mõningatest tunnustest:"),
-                      verbatimTextOutput("summary")
+                      verbatimTextOutput("summary"),
+                      p('Esmase analüüsi käigus võib märgata, et kõige enam leidub andmestikus 
+                        kirjeid mängu ', tags$b('"Need for Speed: Most Wanted"'), ' kohta, kusjuures top3-e kuulub ka ',
+                        tags$b('"Ratatouille"'), '. Kõige rohkem leidub andmetes ', tags$b("PS2"), ' mänge ning populaarseim žanr on ',
+                        tags$b('Action.')),
+                      p("Kõige rohkem on üht mängu üle terve maailma müüdud pea ", tags$b("83 miljonit ühikut"),
+                        ", kusjuures Põhja-Ameerikas on see 41, Euroopas 29 ja ainuüksi Jaapanis 7 miljonit ühikut. 
+                        Üleilmsete müükide mediaan on 0,17, mis tähendab seda, et 50% andmestikus olevatest mängudest igaüht 
+                        on ostetud 170 000 kuni 82 530 000 tükki, ning seega on tegemist üpris menukate mängudega."),
+                      p("Kriitikud on kõige paremateks mängudeks valinud ",
+                        tags$b("„Grand Theft Auto IV“"), " ja ", tags$b("„Tony Hawk's Pro Skater 2“"), " skooriga ", tags$b("98/100"),
+                      ' ja kõige kehvemaks on märgitud Deep Silveri mäng ', tags$b("„Ride to Hell“ (13/100)"), '. 
+                        Kõige paremini on Metacriticu tellijad hinnanud üht mängu 97 palliga 100-st, kõige väiksem 
+                        skoor on 1. Kõige rohkem on üht mängu Metacriticu tellijate poolt hinnatud ', tags$b("10 665 korda"),
+                      " („The Witcher 3: Wild Hunt“)."),
+                      p("Kõige rohkem leidub meie andmestikus ", tags$b("Ubisofti"), " mänge, temale järgnevad ",
+                        tags$b("EA Canada"), " ja ", tags$b("EA Sports"), ". Enim on vaadeldavate mängude seas selliseid, 
+                        mis on kõigile mõeldud (E-Everyone) ning sellele järgnevad teismelistele (T-Teens) ja täiskasvanute (M-Mature) 
+                        mängud.")
              ),
-          
+             
              tabPanel("Joondiagramm",
                       
                       titlePanel(h1("Rakendus videomängude müükide visualiseerimiseks")),
@@ -227,7 +247,7 @@ ui <- fluidPage(
                           p("Mdea no")
                         )
                       )      
-              ),
+             ),
              tabPanel("Mängud ja jaotajad",
                       titlePanel(h1("Rakendus videomängude müükide visualiseerimiseks")),
                       
@@ -239,14 +259,14 @@ ui <- fluidPage(
                                              selected = "PC"),
                           checkboxInput('all_platforms_games', 'Kõik valikud'),
                           pickerInput(
-                                      inputId = "genre_games", label = "Vali žanr",
-                                      choices = levels(video_games$Genre),
-                                      options = list(`actions-box` = TRUE,
-                                                     `selected-text-format` = paste0("count = ", length(levels(video_games$Genre))),
-                                                     `count-selected-text` = "Kõik valikud",
-                                                     `select-all-text` = "Vali kõik",
-                                                     `deselect-all-text` = "Tühista valik"),
-                                      multiple = TRUE),
+                            inputId = "genre_games", label = "Vali žanr",
+                            choices = levels(video_games$Genre),
+                            options = list(`actions-box` = TRUE,
+                                           `selected-text-format` = paste0("count = ", length(levels(video_games$Genre))),
+                                           `count-selected-text` = "Kõik valikud",
+                                           `select-all-text` = "Vali kõik",
+                                           `deselect-all-text` = "Tühista valik"),
+                            multiple = TRUE),
                           #selectInput("genre_games",
                           #            strong("Vali žanr"),
                           #            choices = levels(video_games$Genre),
@@ -263,7 +283,7 @@ ui <- fluidPage(
                           plotOutput("publishers")
                         )
                       )
-              )
+             )
   )
 )
 
@@ -317,14 +337,14 @@ server <- function(input, output, session) {
     colnames(video_games)
   })
   
-    output$platforms <- renderPrint({
-      mainstream_platforms <- c("XB", "X360", "WiiU", "Wii",
-                                "SNES", "PSP", "PS4", "PS3", "PS2", 
-                                "PS", "PC", "NES", "N64", "GEN", 
-                                "GC", "GBA", "DS", "3DS", "2600")
-      mainstream_platforms
+  output$platforms <- renderPrint({
+    mainstream_platforms <- c("XB", "X360", "WiiU", "Wii",
+                              "SNES", "PSP", "PS4", "PS3", "PS2", 
+                              "PS", "PC", "NES", "N64", "GEN", 
+                              "GC", "GBA", "DS", "3DS", "2600")
+    mainstream_platforms
   })
-    
+  
   output$plot_heatmap <- renderPlot({
     plot_heatmap(platforms = input$selected_platforms)
   })
@@ -336,7 +356,7 @@ server <- function(input, output, session) {
   output$publishers <- renderPlot({
     plot_publishers(platforms = input$selected_platforms_games, genres = input$genre_games, n = input$n_games)
   })
-
+  
 }
 
 # Run the application 
