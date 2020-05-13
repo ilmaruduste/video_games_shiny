@@ -324,7 +324,7 @@ ui <- fluidPage(
                       )
              ),
              
-             tabPanel("Korellatsioonid",
+             tabPanel("Korrelatsioonid",
                       titlePanel(h1("Rakendus videomängude müükide visualiseerimiseks")),
                       
                       sidebarLayout(
