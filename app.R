@@ -61,7 +61,7 @@ text_sales = function(platforms) {
       filter(Platform == platform)
     
     sales <- sum(correct_platform$Global_Sales)
-    plt_sales = paste(toString(platform), "Global Sales:", sep=" ") #a little kilplaneism never hurt nobody
+    plt_sales = paste(toString(platform), "Global Sales:", sep=" ")
     plt_sales = paste(plt_sales, toString(sales), sep=" ")
     plt_sales = paste(plt_sales, "M", sep="")
     text <- append(text, plt_sales)
@@ -106,7 +106,8 @@ plot_publishers = function(genres, platforms, n) {
     theme(axis.text.x = element_text(angle = 90, hjust = 1))+
     ggtitle("Müüdud mängud")+
     xlab("Jaotaja")+
-    ylab("Müüdud mängude arv, 10^6")
+    ylab("Müüdud mängude arv, 10^6")+
+    coord_flip()
 }
 
 #Visualise highest regional/global sales by game
@@ -125,7 +126,8 @@ plot_games = function(genres, platforms, n) {
     theme(axis.text.x = element_text(angle = 90, hjust = 1))+
     ggtitle("Müüdud mängud")+
     xlab("Mäng")+
-    ylab("Müüdud mängude arv, 10^6")
+    ylab("Müüdud mängude arv, 10^6")+
+    coord_flip()
 }
 
 # Define UI for application
@@ -274,8 +276,9 @@ ui <- fluidPage(
                         ),
                         
                         mainPanel(
-                          h2("ASD"),
+                          h2("TOP mängud"),
                           plotOutput("games"),
+                          h2("TOP jaotajad"),
                           plotOutput("publishers")
                         )
                       )
@@ -357,3 +360,4 @@ server <- function(input, output, session) {
 
 # Run the application 
 shinyApp(ui = ui, server = server)
+
