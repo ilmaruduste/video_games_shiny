@@ -240,8 +240,7 @@ ui <- fluidPage(
                           h2("Videomängude müügid žanri ja platvormi järgi"),
                           p("Erinevate platvormide žanrite müükide uurimiseks lõime heatmapi,
                             kuhu saab valida endale meelepäraseid platvorme."),
-                          plotOutput("plot_heatmap"),
-                          p("Mdea no")
+                          plotOutput("plot_heatmap")
                         )
                       )      
              ),
