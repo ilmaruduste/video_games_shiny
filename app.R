@@ -40,14 +40,14 @@ plot_sales = function(video_games, genres, platforms){
     group_by(Year_of_Release, Platform) %>% 
     summarise(Global_Sales = sum(Global_Sales)) %>% 
     filter(Year_of_Release!='N/A') %>% 
-    ggplot(aes(x=Year_of_Release, y=Global_Sales, group=Platform, color=Platform)) +
-    geom_ribbon(aes(ymin=0, ymax= Global_Sales, fill=Platform), alpha=0.2) + #TODO: See if this can be improved. Right now the filling is quite ugly. Turn down opacity somehow?
+    mutate(Platvorm = Platform) %>% 
+    ggplot(aes(x=Year_of_Release, y=Global_Sales, group=Platform, color=Platvorm)) +
+    geom_ribbon(aes(ymin=0, ymax= Global_Sales, fill=Platvorm), alpha=0.2) + #TODO: See if this can be improved. Right now the filling is quite ugly. Turn down opacity somehow?
     #geom_line() + #TODO: Play around with this and see what works better
     theme(axis.text.x = element_text(angle = 90, hjust = 1))+
     ggtitle("Müüdud mängude koguarv valitud aastate lõikes")+
     xlab("Aasta")+
     ylab("Müüdud mängude arv, 10^6")
-    #guides(fill=guide_legend(title="Platvorm")) #TODODO: platform -> platvorm
 }
 
 #Print out Sales for each platform
