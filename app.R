@@ -61,11 +61,7 @@ text_sales = function(platforms) {
       filter(Platform == platform)
     
     sales <- sum(correct_platform$Global_Sales)
-<<<<<<< HEAD
     plt_sales = paste(toString(platform), " Games Global Sales:", sep=" ") #a little kilplaneism never hurt nobody
-=======
-    plt_sales = paste(toString(platform), "Global Sales:", sep=" ")
->>>>>>> 4896ce5024deb1cddce56929cc57675fcaf53590
     plt_sales = paste(plt_sales, toString(sales), sep=" ")
     plt_sales = paste(plt_sales, "M", sep="")
     text <- append(text, plt_sales)
