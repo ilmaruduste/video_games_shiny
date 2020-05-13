@@ -226,9 +226,9 @@ ui <- fluidPage(
                         tags$b("EA Canada"), " ja ", tags$b("EA Sports"), ". Enim on vaadeldavate mängude seas selliseid, 
                         mis on kõigile mõeldud (E-Everyone) ning sellele järgnevad teismelistele (T-Teens) ja täiskasvanute (M-Mature) 
                         mängud."),
-                      p("Käesoleva programmi koostamisel avastasime, et kasutatav andmestik on mingil määral vigane. Siinkohal ei arvestata mängude digitaalse
-                        müügiga ning loetakse vaid füüsilisi koopiaid, mis ei ole tänapäeval enam põhiviis mängude levitamiseks. Seega on TOP mängude hulgast puudu
-                        maailma ühed suuremad mängud, nagu „Minecraft“, „Skyrim“ jms. Steami platvormi müüginumbreid ei võeta arvesse PC kategoorias.")
+                      p("Käesoleva programmi koostamisel avastasime, et kasutatav andmestik on pisut ", tags$b("vigane."), " Siinkohal ei arvestata mängude digitaalse
+                        müügiga ning loetakse vaid füüsilisi koopiaid, mis ei ole tänapäeval enam põhiviis mängude levitamiseks. ", tags$b("Seega on TOP mängude hulgast puudu
+                        maailma ühed suuremad mängud nagu „Minecraft“, „Skyrim“ jms."), " Steami platvormi müüginumbreid ei võeta arvesse PC kategoorias.")
              ),
              
              tabPanel("Joondiagramm",
@@ -356,8 +356,8 @@ ui <- fluidPage(
                         mainPanel(
                           h1("Liides visualiseerimaks seoseid erinevate tunnuste vahel"),
                           plotOutput("cor"),
-                          p("Käesoleval lehel on võimalik visualiseerida seoseid andmestiku kahe tunnuse vahel ning valida värviks mõni kolmas tunnus.
-                            Huvitav on vaadata selliseid seoseid nagu User Score vs Critic Score (mille graafik võib viidata asjaolule, et mängukriitikud
+                          p(tags$b("Käesoleval lehel on võimalik visualiseerida seoseid andmestiku kahe tunnuse vahel ning valida värviks mõni kolmas tunnus.")), 
+                          p("Huvitav on vaadata selliseid seoseid nagu User Score vs Critic Score (mille graafik võib viidata asjaolule, et mängukriitikud
                             ja mängijaskond ei pruugi alati nõustuda) või Japanese Sales vs Global Sales (mille graafik viitab Jaapani nišiturule, st Jaapani
                             mängud ei pruugi globaalselt hästi müüa, kuigi seda teevad Euroopas ja USAs populaarsed mängud).")
                         )
