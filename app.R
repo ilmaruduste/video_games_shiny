@@ -227,7 +227,7 @@ ui <- fluidPage(
                         mängud."),
                       p("Käesoleva programmi koostamisel avastasime, et kasutatav andmestik on mingil määral vigane. Siinkohal ei arvestata mängude digitaalse
                         müügiga ning loetakse vaid füüsilisi koopiaid, mis ei ole tänapäeval enam põhiviis mängude levitamiseks. Seega on TOP mängude hulgast puudu
-                        Maailma ühed suuremad mängud, nagu Minecraft, Skyrim jms. Steam'i platvormi müüginumbreid ei võeta arvesse PC kategoorias.")
+                        maailma ühed suuremad mängud, nagu „Minecraft“, „Skyrim“ jms. Steami platvormi müüginumbreid ei võeta arvesse PC kategoorias.")
              ),
              
              tabPanel("Joondiagramm",
@@ -355,7 +355,7 @@ ui <- fluidPage(
                         mainPanel(
                           h1("Liides visualiseerimaks seoseid erinevate tunnuste vahel"),
                           plotOutput("cor"),
-                          p("Käesoleval lehel on võimalik visualiseerida seoseid andmestiku kahe tunnuse vahel ning sättida kolmas tunnus värviks.
+                          p("Käesoleval lehel on võimalik visualiseerida seoseid andmestiku kahe tunnuse vahel ning valida värviks mõni kolmas tunnus.
                             Huvitav on vaadata selliseid seoseid nagu User Score vs Critic Score (mille graafik võib viidata asjaolule, et mängukriitikud
                             ja mängijaskond ei pruugi alati nõustuda) või Japanese Sales vs Global Sales (mille graafik viitab Jaapani nišiturule, st Jaapani
                             mängud ei pruugi globaalselt hästi müüa, kuigi seda teevad Euroopas ja USAs populaarsed mängud).")
