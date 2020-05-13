@@ -18,6 +18,18 @@ mainstream_platforms <- c("XB", "X360", "WiiU", "Wii",
                           "PS", "PC", "NES", "N64", "GEN", 
                           "GC", "GBA", "DS", "3DS", "2600")
 
+# Defining dictionary for column name to variable name
+video_games_options <- c(
+  "Year of Release" = "Year_of_Release",
+  "North American Sales" = "NA_Sales", 
+  "European Sales" = "EU_Sales",
+  "Japanese Sales" = "JP_Sales", 
+  "Sales in other regions" = "Other_Sales", 
+  "Global Sales" = "Global_Sales",
+  "Critic Score" = "Critic_Score", 
+  "User Score" = "User_Score"
+)
+
 #Mainstream platform filtering
 video_games <- video_games %>% 
   filter(Genre != "" & Genre != " " & Platform %in% mainstream_platforms) 
@@ -33,7 +45,6 @@ video_games$Platform = droplevels(video_games$Platform)
 
 #platforms = c('Wii', 'PS2')
 #Define linegraph plot for video game sales
-#TODO: Fix legend
 plot_sales = function(video_games, genres, platforms){
   video_games %>% 
     filter(Genre %in% genres & Platform %in% platforms) %>% 
@@ -90,8 +101,6 @@ platvormist ja žanrist, 10^6"))
 
 #Visualise highest regional/global sales by publisher
 #TODO: Fill the global sales bar with regional sales perhaps?
-#TODO: Fix axis names and clean up the graph
-
 plot_publishers = function(genres, platforms, n) {
   video_games %>% 
     filter(Genre %in% genres,
@@ -112,8 +121,6 @@ plot_publishers = function(genres, platforms, n) {
 
 #Visualise highest regional/global sales by game
 #TODO: Fill the global sales bar with regional sales perhaps?
-#TODO: Fix axis names and clean up the graph
-
 plot_games = function(genres, platforms, n) {
   video_games %>% 
     filter(Genre %in% genres,
@@ -128,6 +135,30 @@ plot_games = function(genres, platforms, n) {
     xlab("Mäng")+
     ylab("Müüdud mängude arv, 10^6")+
     coord_flip()
+}
+
+plot_cor = function(column_x, column_y, column_color) {
+  
+  new_video_games <- video_games
+  
+  tilt <- 0
+  
+  if (column_x == "Year_of_Release") {
+    tilt <- 45
+  }
+  
+  if (column_color == "Year_of_Release") {
+    new_video_games <- as.numeric(video_games$Year_of_Release)
+  }
+  
+  video_games %>% 
+    filter(User_Score != 1 & !is.na(User_Count)) %>% 
+    ggplot(aes_string(x=column_x, y=column_y)) + 
+    geom_point(aes_string(color=column_color)) + 
+    geom_smooth() + 
+    theme(axis.text.x = element_text(angle = tilt, hjust = 1)) +
+    labs(x = names(video_games_options[which(video_games_options == column_x)]),
+         y = names(video_games_options[which(video_games_options == column_y)]))
 }
 
 # Define UI for application
@@ -189,7 +220,10 @@ ui <- fluidPage(
                       p("Kõige rohkem leidub meie andmestikus ", tags$b("Ubisofti"), " mänge, temale järgnevad ",
                         tags$b("EA Canada"), " ja ", tags$b("EA Sports"), ". Enim on vaadeldavate mängude seas selliseid, 
                         mis on kõigile mõeldud (E-Everyone) ning sellele järgnevad teismelistele (T-Teens) ja täiskasvanute (M-Mature) 
-                        mängud.")
+                        mängud."),
+                      p("Käesoleva programmi koostamisel avastasime, et kasutatav andmestik on mingil määral vigane. Siinkohal ei arvestata mängude digitaalse
+                        müügiga ning loetakse vaid füüsilisi koopiaid, mis ei ole tänapäeval enam põhiviis mängude levitamiseks. Seega on TOP mängude hulgast puudu
+                        Maailma ühed suuremad mängud, nagu Minecraft, Skyrim jms. Steam'i platvormi müüginumbreid ei võeta arvesse PC kategoorias.")
              ),
              
              tabPanel("Joondiagramm",
@@ -221,7 +255,9 @@ ui <- fluidPage(
                           p("Selleks, et paremini aru saada, kuidas on videomängude müük läbi aastate muutunud, 
                             koostasime joondiagrammi vastavalt valitud žanrile ja platvormidele."),
                           plotOutput("plot_sales"),
-                          p("Platvormidega katsetades ilmneb, et tuntumad platvormid müüvad paremini kui teised."),
+                          p("Siinkohal tasub kõige enam võrrelda platvorme, mis on kas samas generatsioonis (nt 7. generatsioon: Wii, Xbox 360 ja PS3), et näha, missugune konsool
+                          võitis \"konsoolisõja\", 
+                            või on sama firma poolt välja antud konsoolid, et näha generatsioonide vaheldumist."),
                           verbatimTextOutput("text_sales")
                         )
                       )      
@@ -282,7 +318,42 @@ ui <- fluidPage(
                           plotOutput("publishers")
                         )
                       )
-             )
+             ),
+             
+             tabPanel("Korellatsioonid",
+                      titlePanel(h1("Rakendus videomängude müükide visualiseerimiseks")),
+                      
+                      sidebarLayout(
+                        sidebarPanel(
+                          selectInput("selected_column_x",
+                                      "Vali horisontaaltelg:",
+                                      choices = c("Year_of_Release", "NA_Sales", "EU_Sales",
+                                                  "JP_Sales", "Other_Sales", "Global_Sales",
+                                                  "Critic_Score", "User_Score"),
+                                      selected = "User_Score"
+                                      ),
+                          selectInput("selected_column_y",
+                                      "Vali vertikaaltelg:",
+                                      choices = c("Year_of_Release", "NA_Sales", "EU_Sales",
+                                                  "JP_Sales", "Other_Sales", "Global_Sales",
+                                                  "Critic_Score", "User_Score"),
+                                      selected = "Critic_Score"
+                                      ),
+                          selectInput("selected_column_color",
+                                      "Vali värv:",
+                                      choices = c("Platform", "Year_of_Release", "Genre",
+                                                  "NA_Sales", "EU_Sales", "Rating",
+                                                  "JP_Sales", "Other_Sales", "Global_Sales",
+                                                  "Critic_Score", "User_Score"),
+                                      selected = "Rating"
+                          )
+                        ),
+                        mainPanel(
+                          h1("xd"),
+                          plotOutput("cor")
+                        )
+                      )
+                      )
   )
 )
 
@@ -315,6 +386,29 @@ server <- function(input, output, session) {
                          label = "Vali žanr",
                          choices = levels(video_games$Genre),
                          selected = "Sports")
+    
+    updateSelectizeInput(session, "selected_column_x",
+                         label = "Vali horisontaaltelg:",
+                         choices = c("Year_of_Release", "NA_Sales", "EU_Sales",
+                                     "JP_Sales", "Other_Sales", "Global_Sales",
+                                     "Critic_Score", "User_Score"),
+                         selected = "User_Score")
+    
+    updateSelectizeInput(session, "selected_column_y",
+                         label = "Vali vertikaaltelg:",
+                         choices = c("Year_of_Release", "NA_Sales", "EU_Sales",
+                                     "JP_Sales", "Other_Sales", "Global_Sales",
+                                     "Critic_Score", "User_Score"),
+                         selected = "Critic_Score")
+    
+    updateSelectizeInput(session, "selected_column_color",
+                         label = "Vali värv:",
+                         choices = c("Platform", "Year_of_Release", "Genre",
+                                     "NA_Sales", "EU_Sales", "Rating",
+                                     "JP_Sales", "Other_Sales", "Global_Sales",
+                                     "Critic_Score", "User_Score"),
+                         selected = "Rating")
+    
   })
   output$img <- renderUI({
     tags$img(src = "https://cdn.pixabay.com/photo/2016/04/16/09/03/video-game-1332694_1280.png", height="100%", width="100%")
@@ -354,6 +448,12 @@ server <- function(input, output, session) {
   
   output$publishers <- renderPlot({
     plot_publishers(platforms = input$selected_platforms_games, genres = input$genre_games, n = input$n_games)
+  })
+  
+  output$cor <- renderPlot({
+    plot_cor(column_x = input$selected_column_x, 
+             column_y = input$selected_column_y, 
+             column_color = input$selected_column_color)
   })
   
 }
