@@ -100,10 +100,10 @@ plot_publishers = function(genres, platforms, n) {
     summarise(Global_Sales = sum(Global_Sales)) %>% 
     arrange(desc(Global_Sales)) %>% 
     top_n(n, Global_Sales) %>% 
-    ggplot(aes(x=reorder(Publisher, -Global_Sales), y=Global_Sales)) + 
+    ggplot(aes(x=reorder(Publisher, Global_Sales), y=Global_Sales)) + 
     geom_bar(stat="identity", fill = "#1C6595") +
-    geom_text(aes(label=round(Global_Sales, 1)), vjust=1.6, color="white", size=3.5)+
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+    geom_text(aes(label=round(Global_Sales, 1)), hjust=1.2, color="white", size=3.5)+
+    theme(axis.text.x = element_text(angle = 0, hjust = 1))+
     ggtitle("Müüdud mängud")+
     xlab("Jaotaja")+
     ylab("Müüdud mängude arv, 10^6")+
@@ -120,10 +120,10 @@ plot_games = function(genres, platforms, n) {
            Platform %in% platforms) %>%
     arrange(desc(Global_Sales)) %>% 
     top_n(n, Global_Sales) %>% 
-    ggplot(aes(x=reorder(Name, -Global_Sales), y=Global_Sales)) + 
+    ggplot(aes(x=reorder(Name, Global_Sales), y=Global_Sales)) + 
     geom_bar(stat="identity", fill = "#16A25F") +
-    geom_text(aes(label=round(Global_Sales, 1)), vjust=1.6, color="white", size=3.5)+
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+    geom_text(aes(label=round(Global_Sales, 1)), hjust=1.2, color="white", size=3.5)+
+    theme(axis.text.x = element_text(angle = 0, hjust = 1))+
     ggtitle("Müüdud mängud")+
     xlab("Mäng")+
     ylab("Müüdud mängude arv, 10^6")+
