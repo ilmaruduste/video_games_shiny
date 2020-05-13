@@ -40,14 +40,14 @@ plot_sales = function(video_games, genres, platforms){
     group_by(Year_of_Release, Platform) %>% 
     summarise(Global_Sales = sum(Global_Sales)) %>% 
     filter(Year_of_Release!='N/A') %>% 
-    ggplot(aes(x=Year_of_Release, y=Global_Sales, group=Platform, color=Platform)) +
-    geom_ribbon(aes(ymin=0, ymax= Global_Sales, fill=Platform), alpha=0.2) + #TODO: See if this can be improved. Right now the filling is quite ugly. Turn down opacity somehow?
+    mutate(Platvorm = Platform) %>% 
+    ggplot(aes(x=Year_of_Release, y=Global_Sales, group=Platform, color=Platvorm)) +
+    geom_ribbon(aes(ymin=0, ymax= Global_Sales, fill=Platvorm), alpha=0.2) + #TODO: See if this can be improved. Right now the filling is quite ugly. Turn down opacity somehow?
     #geom_line() + #TODO: Play around with this and see what works better
     theme(axis.text.x = element_text(angle = 90, hjust = 1))+
     ggtitle("Müüdud mängude koguarv valitud aastate lõikes")+
     xlab("Aasta")+
-    ylab("Müüdud mängude arv, 10^6")+
-    guides(fill=guide_legend(title="Platvorm"))
+    ylab("Müüdud mängude arv, 10^6")
 }
 
 #Print out Sales for each platform
@@ -61,7 +61,11 @@ text_sales = function(platforms) {
       filter(Platform == platform)
     
     sales <- sum(correct_platform$Global_Sales)
+<<<<<<< HEAD
     plt_sales = paste(toString(platform), " Games Global Sales:", sep=" ") #a little kilplaneism never hurt nobody
+=======
+    plt_sales = paste(toString(platform), "Global Sales:", sep=" ")
+>>>>>>> 4896ce5024deb1cddce56929cc57675fcaf53590
     plt_sales = paste(plt_sales, toString(sales), sep=" ")
     plt_sales = paste(plt_sales, "M", sep="")
     text <- append(text, plt_sales)
@@ -106,7 +110,8 @@ plot_publishers = function(genres, platforms, n) {
     theme(axis.text.x = element_text(angle = 90, hjust = 1))+
     ggtitle("Müüdud mängud")+
     xlab("Jaotaja")+
-    ylab("Müüdud mängude arv, 10^6")
+    ylab("Müüdud mängude arv, 10^6")+
+    coord_flip()
 }
 
 #Visualise highest regional/global sales by game
@@ -125,7 +130,8 @@ plot_games = function(genres, platforms, n) {
     theme(axis.text.x = element_text(angle = 90, hjust = 1))+
     ggtitle("Müüdud mängud")+
     xlab("Mäng")+
-    ylab("Müüdud mängude arv, 10^6")
+    ylab("Müüdud mängude arv, 10^6")+
+    coord_flip()
 }
 
 # Define UI for application
@@ -142,24 +148,23 @@ ui <- fluidPage(
                       mainPanel(
                         h2("Projekti kirjeldus"),
                         p('Oleme noored andmeteadusehuvilised Tartu Ülikooli tudengid Ilmar Uduste ja Kai Budrikas ning otsustasime 
-                          aine "Statistiline andmeteadus ja visualiseerimine" raames uurida erinevate videomängude müüke.
-                          Andmestik, mis pärineb Kaggle-st, koosneb 16 tunnusest ja pea 16 000 erinevast mängust.'),
-                        p('Selleks, et oma andmeid kenasti visualiseerida, koostasime 100 002 interaktiivset visualiseeringut, 
-                            mida võite uurida järgmistelt lehekülgedelt.') #Xd palun töötle mind
+                          aine "Statistiline andmeteadus ja visualiseerimine" raames uurida erinevate videomängude müüke.'),
+                        p(tags$a(
+                          href="https://www.kaggle.com/rush4ratio/video-game-sales-with-ratings", "Videomängude andmestik"), 
+                          "on võetud andmeteadust propageerivalt lehelt Kaggle, kus jagatakse andmestikke
+                        ning neil põhinevaid töövihikuid. Andmestik on aastast 2016 ning koosneb 16 tunnusest ja pea 16 000 erinevast mängust."),
+                        p('Selleks, et oma andmeid kenasti visualiseerida, koostasime mitu interaktiivset visualiseeringut, 
+                            mida võite uurida järgmistelt lehekülgedelt.')
                       )
                       
              ),
              
              tabPanel("Andmestiku ülevaade",
                       titlePanel(h1("Rakendus videomängude müükide visualiseerimiseks")),
-                      p(tags$a(
-                        href="https://www.kaggle.com/rush4ratio/video-game-sales-with-ratings", "Videomängude andmestik"), 
-                        "on võetud andmeteadust propageerivalt lehelt Kaggle, kus jagatakse andmestikke
-                        ning neil põhinevaid töövihikuid. Andmestik on aastast 2016."),
-                      p("Allpool on kuvatud andmestiku tunnused:"),
+                      p("Allpool on meie andmestiku tunnused:"),
                       verbatimTextOutput("colnames"),
-                      p("Esialgne andmestik koosneb 16 tunnusest ning 16 719 kirjest, mida omakorda filtreeritakse, et
-                        visualiseerimiseks kasutatav andmestik vastaks teatud nõutele:"),
+                      p("Andmestiku kohandamiseks filtreerisime vaatluseid, et
+                        visualiseerimiseks kasutatav see vastaks teatud nõutele:"),
                       tags$ol(
                         tags$li("Filtreeritakse välja mänguplatvormid, mida ei peeta peavoolu omadeks. 
                                 Kasutatavate mänguplatvormide hulk on järgmine: ",
@@ -178,14 +183,13 @@ ui <- fluidPage(
                         tags$b('Action.')),
                       p("Kõige rohkem on üht mängu üle terve maailma müüdud pea ", tags$b("83 miljonit ühikut"),
                         ", kusjuures Põhja-Ameerikas on see 41, Euroopas 29 ja ainuüksi Jaapanis 7 miljonit ühikut. 
-                        Üleilmsete müükide mediaan on 0,17, mis tähendab seda, et 50% andmestikus olevatest mängudest igaüht 
-                        on ostetud 170 000 kuni 82 530 000 tükki, ning seega on tegemist üpris menukate mängudega."),
+                        Üleilmsete müükide alumine kvartiil on 0,06, mis tähendab seda, et 75% andmestikus olevatest mängudest igaüht 
+                        on ostetud 60 000 kuni 82 530 000 tükki, ning seega on tegemist üpris menukate mängudega."),
                       p("Kriitikud on kõige paremateks mängudeks valinud ",
                         tags$b("„Grand Theft Auto IV“"), " ja ", tags$b("„Tony Hawk's Pro Skater 2“"), " skooriga ", tags$b("98/100"),
                       ' ja kõige kehvemaks on märgitud Deep Silveri mäng ', tags$b("„Ride to Hell“ (13/100)"), '. 
                         Kõige paremini on Metacriticu tellijad hinnanud üht mängu 97 palliga 100-st, kõige väiksem 
-                        skoor on 1. Kõige rohkem on üht mängu Metacriticu tellijate poolt hinnatud ', tags$b("10 665 korda"),
-                      " („The Witcher 3: Wild Hunt“)."),
+                        skoor on 1. Kõige rohkem on üht mängu Metacriticu tellijate poolt hinnatud ', tags$b("10 665 korda („The Witcher 3: Wild Hunt“).")),
                       p("Kõige rohkem leidub meie andmestikus ", tags$b("Ubisofti"), " mänge, temale järgnevad ",
                         tags$b("EA Canada"), " ja ", tags$b("EA Sports"), ". Enim on vaadeldavate mängude seas selliseid, 
                         mis on kõigile mõeldud (E-Everyone) ning sellele järgnevad teismelistele (T-Teens) ja täiskasvanute (M-Mature) 
@@ -221,8 +225,7 @@ ui <- fluidPage(
                           p("Selleks, et paremini aru saada, kuidas on videomängude müük läbi aastate muutunud, 
                             koostasime joondiagrammi vastavalt valitud žanrile ja platvormidele."),
                           plotOutput("plot_sales"),
-                          p("Platvormidega katsetades ilmneb, et tuntumad platvormid müüvad paremini kui teised lol no shizzle
-                            Ilmar tule appi"),
+                          p("Platvormidega katsetades ilmneb, et tuntumad platvormid müüvad paremini kui teised."),
                           verbatimTextOutput("text_sales")
                         )
                       )      
@@ -243,8 +246,7 @@ ui <- fluidPage(
                           h2("Videomängude müügid žanri ja platvormi järgi"),
                           p("Erinevate platvormide žanrite müükide uurimiseks lõime heatmapi,
                             kuhu saab valida endale meelepäraseid platvorme."),
-                          plotOutput("plot_heatmap"),
-                          p("Mdea no")
+                          plotOutput("plot_heatmap")
                         )
                       )      
              ),
@@ -278,8 +280,9 @@ ui <- fluidPage(
                         ),
                         
                         mainPanel(
-                          h2("ASD"),
+                          h2("TOP mängud"),
                           plotOutput("games"),
+                          h2("TOP jaotajad"),
                           plotOutput("publishers")
                         )
                       )
@@ -361,3 +364,4 @@ server <- function(input, output, session) {
 
 # Run the application 
 shinyApp(ui = ui, server = server)
+
