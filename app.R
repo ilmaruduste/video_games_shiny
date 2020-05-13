@@ -155,7 +155,8 @@ plot_cor = function(column_x, column_y, column_color) {
   }
   
   video_games %>% 
-    filter(User_Score != 1 & !is.na(User_Count)) %>% 
+    filter(User_Score != 1 & !is.na(User_Count),
+           Rating != "") %>% 
     ggplot(aes_string(x=column_x, y=column_y)) + 
     geom_point(aes_string(color=column_color)) + 
     geom_smooth() + 
@@ -218,7 +219,7 @@ ui <- fluidPage(
                         on ostetud 60 000 kuni 82 530 000 tükki, ning seega on tegemist üpris menukate mängudega."),
                       p("Kriitikud on kõige paremateks mängudeks valinud ",
                         tags$b("„Grand Theft Auto IV“"), " ja ", tags$b("„Tony Hawk's Pro Skater 2“"), " skooriga ", tags$b("98/100"),
-                      ' ja kõige kehvemaks on märgitud Deep Silveri mäng ', tags$b("„Ride to Hell“ (13/100)"), '. 
+                        ' ja kõige kehvemaks on märgitud Deep Silveri mäng ', tags$b("„Ride to Hell“ (13/100)"), '. 
                         Kõige paremini on Metacriticu tellijad hinnanud üht mängu 97 palliga 100-st, kõige väiksem 
                         skoor on 1. Kõige rohkem on üht mängu Metacriticu tellijate poolt hinnatud ', tags$b("10 665 korda („The Witcher 3: Wild Hunt“).")),
                       p("Kõige rohkem leidub meie andmestikus ", tags$b("Ubisofti"), " mänge, temale järgnevad ",
@@ -335,14 +336,14 @@ ui <- fluidPage(
                                                   "Japanese Sales", "Sales in other regions", "Global Sales",
                                                   "Critic Score", "User Score"),
                                       selected = "User Score"
-                                      ),
+                          ),
                           selectInput("selected_column_y",
                                       "Vali vertikaaltelg:",
                                       choices = c("Year of Release", "North American Sales", "European Sales",
                                                   "Japanese Sales", "Sales in other regions", "Global Sales",
                                                   "Critic Score", "User Score"),
                                       selected = "Critic Score"
-                                      ),
+                          ),
                           selectInput("selected_column_color",
                                       "Vali värv:",
                                       choices = c("Platform", "Year of Release", "Genre",
@@ -361,7 +362,7 @@ ui <- fluidPage(
                             mängud ei pruugi globaalselt hästi müüa, kuigi seda teevad Euroopas ja USAs populaarsed mängud).")
                         )
                       )
-                      )
+             )
   )
 )
 
@@ -459,7 +460,7 @@ server <- function(input, output, session) {
   })
   
   output$cor <- renderPlot({
-
+    
     plot_cor(column_x = video_games_options[input$selected_column_x], 
              column_y = video_games_options[input$selected_column_y], 
              column_color = video_games_options[input$selected_column_color])
@@ -469,4 +470,3 @@ server <- function(input, output, session) {
 
 # Run the application 
 shinyApp(ui = ui, server = server)
-
