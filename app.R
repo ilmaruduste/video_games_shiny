@@ -46,8 +46,8 @@ plot_sales = function(video_games, genres, platforms){
     theme(axis.text.x = element_text(angle = 90, hjust = 1))+
     ggtitle("Müüdud mängude koguarv valitud aastate lõikes")+
     xlab("Aasta")+
-    ylab("Müüdud mängude arv, 10^6")+
-    guides(fill=guide_legend(title="Platvorm"))
+    ylab("Müüdud mängude arv, 10^6")
+    #guides(fill=guide_legend(title="Platvorm")) #TODODO: platform -> platvorm
 }
 
 #Print out Sales for each platform
