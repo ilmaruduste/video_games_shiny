@@ -27,7 +27,10 @@ video_games_options <- c(
   "Sales in other regions" = "Other_Sales", 
   "Global Sales" = "Global_Sales",
   "Critic Score" = "Critic_Score", 
-  "User Score" = "User_Score"
+  "User Score" = "User_Score",
+  "Genre" = "Genre",
+  "Rating" = "Rating",
+  "Platform" = "Platform"
 )
 
 #Mainstream platform filtering
@@ -143,11 +146,11 @@ plot_cor = function(column_x, column_y, column_color) {
   
   tilt <- 0
   
-  if (column_x == "Year_of_Release") {
+  if (column_x == "Year of Release") {
     tilt <- 45
   }
   
-  if (column_color == "Year_of_Release") {
+  if (column_color == "Year of Release") {
     new_video_games <- as.numeric(video_games$Year_of_Release)
   }
   
@@ -157,6 +160,7 @@ plot_cor = function(column_x, column_y, column_color) {
     geom_point(aes_string(color=column_color)) + 
     geom_smooth() + 
     theme(axis.text.x = element_text(angle = tilt, hjust = 1)) +
+    guides(fill=guide_legend(title=video_games_options[column_color])) +
     labs(x = names(video_games_options[which(video_games_options == column_x)]),
          y = names(video_games_options[which(video_games_options == column_y)]))
 }
@@ -327,30 +331,34 @@ ui <- fluidPage(
                         sidebarPanel(
                           selectInput("selected_column_x",
                                       "Vali horisontaaltelg:",
-                                      choices = c("Year_of_Release", "NA_Sales", "EU_Sales",
-                                                  "JP_Sales", "Other_Sales", "Global_Sales",
-                                                  "Critic_Score", "User_Score"),
-                                      selected = "User_Score"
+                                      choices = c("Year of Release", "North American Sales", "European Sales",
+                                                  "Japanese Sales", "Sales in other regions", "Global Sales",
+                                                  "Critic Score", "User Score"),
+                                      selected = "User Score"
                                       ),
                           selectInput("selected_column_y",
                                       "Vali vertikaaltelg:",
-                                      choices = c("Year_of_Release", "NA_Sales", "EU_Sales",
-                                                  "JP_Sales", "Other_Sales", "Global_Sales",
-                                                  "Critic_Score", "User_Score"),
-                                      selected = "Critic_Score"
+                                      choices = c("Year of Release", "North American Sales", "European Sales",
+                                                  "Japanese Sales", "Sales in other regions", "Global Sales",
+                                                  "Critic Score", "User Score"),
+                                      selected = "Critic Score"
                                       ),
                           selectInput("selected_column_color",
                                       "Vali värv:",
-                                      choices = c("Platform", "Year_of_Release", "Genre",
-                                                  "NA_Sales", "EU_Sales", "Rating",
-                                                  "JP_Sales", "Other_Sales", "Global_Sales",
-                                                  "Critic_Score", "User_Score"),
+                                      choices = c("Platform", "Year of Release", "Genre",
+                                                  "North American Sales", "European Sales", "Rating",
+                                                  "Japanese Sales", "Sales in other regions", "Global Sales",
+                                                  "Critic Score", "User Score"),
                                       selected = "Rating"
                           )
                         ),
                         mainPanel(
-                          h1("xd"),
-                          plotOutput("cor")
+                          h1("Liides visualiseerimaks seoseid erinevate tunnuste vahel"),
+                          plotOutput("cor"),
+                          p("Käesoleval lehel on võimalik visualiseerida seoseid andmestiku kahe tunnuse vahel ning sättida kolmas tunnus värviks.
+                            Huvitav on vaadata selliseid seoseid nagu User Score vs Critic Score (mille graafik võib viidata asjaolule, et mängukriitikud
+                            ja mängijaskond ei pruugi alati nõustuda) või Japanese Sales vs Global Sales (mille graafik viitab Jaapani nišiturule, st Jaapani
+                            mängud ei pruugi globaalselt hästi müüa, kuigi seda teevad Euroopas ja USAs populaarsed mängud).")
                         )
                       )
                       )
@@ -389,24 +397,24 @@ server <- function(input, output, session) {
     
     updateSelectizeInput(session, "selected_column_x",
                          label = "Vali horisontaaltelg:",
-                         choices = c("Year_of_Release", "NA_Sales", "EU_Sales",
-                                     "JP_Sales", "Other_Sales", "Global_Sales",
-                                     "Critic_Score", "User_Score"),
-                         selected = "User_Score")
+                         choices = c("North American Sales", "European Sales",
+                                     "Japanese Sales", "Sales in other regions", "Global Sales",
+                                     "Critic Score", "User Score"),
+                         selected = "User Score")
     
     updateSelectizeInput(session, "selected_column_y",
                          label = "Vali vertikaaltelg:",
-                         choices = c("Year_of_Release", "NA_Sales", "EU_Sales",
-                                     "JP_Sales", "Other_Sales", "Global_Sales",
-                                     "Critic_Score", "User_Score"),
-                         selected = "Critic_Score")
+                         choices = c("North American Sales", "European Sales",
+                                     "Japanese Sales", "Sales in other regions", "Global Sales",
+                                     "Critic Score", "User Score"),
+                         selected = "Critic Score")
     
     updateSelectizeInput(session, "selected_column_color",
                          label = "Vali värv:",
-                         choices = c("Platform", "Year_of_Release", "Genre",
-                                     "NA_Sales", "EU_Sales", "Rating",
-                                     "JP_Sales", "Other_Sales", "Global_Sales",
-                                     "Critic_Score", "User_Score"),
+                         choices = c("Platform", "Year of Release", "Genre",
+                                     "North American Sales", "European Sales", "Rating",
+                                     "Japanese Sales", "Sales in other regions", "Global Sales",
+                                     "Critic Score", "User Score"),
                          selected = "Rating")
     
   })
@@ -451,9 +459,10 @@ server <- function(input, output, session) {
   })
   
   output$cor <- renderPlot({
-    plot_cor(column_x = input$selected_column_x, 
-             column_y = input$selected_column_y, 
-             column_color = input$selected_column_color)
+
+    plot_cor(column_x = video_games_options[input$selected_column_x], 
+             column_y = video_games_options[input$selected_column_y], 
+             column_color = video_games_options[input$selected_column_color])
   })
   
 }
