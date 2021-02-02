@@ -2,6 +2,8 @@
 
 ## Introduction
 
+<b><a href = 'https://andmeteadus2020.shinyapps.io/videomangud/'>LINK to dashboard.</a></b>
+
 The following is documentation for a Video Game Sales statistics visualization project made in the Shiny package (R) by Ilmar Uduste and Kai Budrikas, Data Science enthusiasts and students of the University of Tartu.
 
 The app's UI in Estonian, as the app was meant as a project in an Estonian course, but the code itself and the comments are written in English.
